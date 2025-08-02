@@ -82,10 +82,14 @@
     .main-content {
         border-radius: 0;
     }
+    .user-name {
+        display: none;
+    }
 
     .main-header {
         padding: var(--spacing-md);
-        flex-wrap: wrap;
+        /* flex-wrap: wrap; */
+        justify-content: space-between;
         gap: var(--spacing-md);
     }
 
