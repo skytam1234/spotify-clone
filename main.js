@@ -68,7 +68,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     // Switch to Login form
     showLoginBtn.addEventListener("click", function () {
-        authFormLogin.reset();
         showLoginForm();
     });
 
@@ -79,64 +78,37 @@ document.addEventListener("DOMContentLoaded", function () {
     // Handle Signup form submission
     signupForm.addEventListener("submit", async function (e) {
         e.preventDefault();
-        const email = document.getElementById("signupEmail").value;
-        const password = document.getElementById("signupPassword").value;
-        const credential = {
-            username: email.split("@")[0],
-            email: email,
-            password: password,
-            displayName: email.split("@")[0],
-        };
-        try {
-            const { user, access_token } = await httpRequest.post(
-                "auth/register",
-                credential
-            );
+        const res = await Signup();
+        if (res) {
+            Toast({
+                title: "Login Successful",
+                message: "You have successfully logged in.",
+                type: "susses",
+                toastIcon: "fa-solid fa-check",
+            });
             closeModal();
-            localStorage.setItem("accessToken", access_token);
-            RenderAvatar(user, true);
-        } catch (error) {
-            console.dir(error);
-            const errorMessage = document.querySelector(".error-message");
-            const messageError = error?.response?.error?.message;
-            errorMessage.textContent =
-                messageError || "An error occurred during signup.";
-            errorMessage.style.display = "flex";
         }
+        authFormSignup.reset();
     });
     // Handle Login form submission
     loginForm.addEventListener("submit", async function (e) {
         e.preventDefault();
-        const email = document.getElementById("loginEmail").value;
-        const password = document.getElementById("loginPassword").value;
-        const credential = {
-            email: email,
-            password: password,
-        };
-        try {
-            const { user, access_token } = await httpRequest.post(
-                "auth/login",
-                credential
-            );
+        const res = await Login();
+        if (res) {
+            Toast({
+                title: "Login Successful",
+                message: "You have successfully logged in.",
+                type: "susses",
+                toastIcon: "fa-solid fa-check",
+            });
             closeModal();
-            localStorage.setItem("accessToken", access_token);
-            RenderAvatar(user, true);
-        } catch (error) {
-            console.dir(error);
-            const errorMessage = document.querySelector(".error-message");
-            const messageError =
-                error?.response?.error?.detail[0]?.message ||
-                error?.response?.error?.message;
-            errorMessage.textContent =
-                messageError || "An error occurred during login.";
-            errorMessage.style.display = "flex";
         }
+        authFormLogin.reset();
     });
 });
 
 // User Menu Dropdown Functionality
 document.addEventListener("DOMContentLoaded", function () {
-    const userAvatar = document.getElementById("userAvatar");
     const userInfo = document.querySelector(".user-info");
     const userDropdown = document.getElementById("userDropdown");
     const logoutBtn = document.getElementById("logoutBtn");
@@ -155,9 +127,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Close dropdown when pressing Escape
-    document.addEventListener("keydown", function (e) {
+    document.addEventListener("keydown", async function (e) {
         if (e.key === "Escape" && userDropdown.classList.contains("show")) {
             userDropdown.classList.remove("show");
+        }
+        if (e.key === "F5") {
+            try {
+                const { user } = await httpRequest.get("users/me");
+                RenderAvatar(user, true);
+            } catch (error) {
+                RenderAvatar(null, false);
+            }
         }
     });
 
@@ -175,21 +155,177 @@ document.addEventListener("DOMContentLoaded", function () {
 // Other functionality
 document.addEventListener("DOMContentLoaded", async function () {
     // TODO: Implement other functionality here
-
     try {
         const { user } = await httpRequest.get("users/me");
         RenderAvatar(user, true);
     } catch (error) {
         RenderAvatar(null, false);
     }
+    Artists("artists");
+    Tracks("tracks");
 });
+
+// Login function placeholder
+async function Login() {
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    const credential = {
+        email: email,
+        password: password,
+    };
+    try {
+        const { user, access_token } = await httpRequest.post(
+            "auth/login",
+            credential
+        );
+        localStorage.setItem("accessToken", access_token);
+        localStorage.setItem("user", user);
+        RenderAvatar(user, true);
+
+        return true;
+    } catch (error) {
+        const errorMessage = document.querySelector(".error-message");
+        const messageError =
+            error?.response?.error?.detail[0]?.message ||
+            error?.response?.error?.message;
+        errorMessage.textContent =
+            messageError || "An error occurred during login.";
+        errorMessage.style.display = "flex";
+        return false;
+    }
+}
+async function Signup() {
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
+    const credential = {
+        username: email.split("@")[0],
+        email: email,
+        password: password,
+        displayName: email.split("@")[0],
+    };
+    try {
+        const { user, access_token } = await httpRequest.post(
+            "auth/register",
+            credential
+        );
+        localStorage.setItem("accessToken", access_token);
+        localStorage.setItem("user", user);
+        RenderAvatar(user, true);
+
+        return true;
+    } catch (error) {
+        console.dir(error);
+        const errorMessage = document.querySelector(".error-message");
+        const messageError = error?.response?.error?.message;
+        errorMessage.textContent =
+            messageError || "An error occurred during signup.";
+        errorMessage.style.display = "flex";
+        return false;
+    }
+}
+function Toast(toast = {}) {
+    const toastElementOld = document.querySelector(".toast");
+    if (toastElementOld) document.body.removeChild(toastElementOld);
+    const toastElement = document.createElement("div");
+    toastElement.classList.add("toast", `toast--${toast.type}`);
+    toastElement.innerHTML = `
+                          <div class="toast__icon">
+                                <i class="${toast.toastIcon}"></i>
+                              </div>
+                              <div class="toast__body">
+                                <h3 class="toast__title">${toast.title}</h3>
+                                <p class="toast__msg">
+                                ${toast.message}
+                                </p>
+                              </div>
+                              <div class="toast__close">
+                                <i class="fa-solid fa-xmark toast__close-icon"></i>
+                              </div>
+                          `;
+    document.body.appendChild(toastElement);
+    const iconClose = document.querySelector(`.toast__close-icon`);
+    iconClose.onclick = function () {
+        document.body.removeChild(toastElement);
+    };
+}
+// function to render the Artists
+async function Artists(path) {
+    const res = await httpRequest.get(path);
+    const artistsGrid = document.querySelector(".artists-grid");
+    let poularArtists = "";
+    if (res) {
+        res.artists.forEach((artist) => {
+            const artistItem = `<div class="artist-card" data-id="${EscapeHtml(
+                artist.id
+            )}">
+                                <div class="artist-card-cover">
+                                    <img
+                                        src="${EscapeHtml(
+                                            artist.image_url
+                                        )}?height=160&width=160"
+                                        alt="Đen" onerror="this.onerror=null;this.src='placeholder.svg';"
+                                    />
+                                    <button class="artist-play-btn">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                                <div class="artist-card-info">
+                                    <h3 class="artist-card-name">${EscapeHtml(
+                                        artist.name
+                                    )}</h3>
+                                    <p class="artist-card-type">Ca sĩ</p>
+                                </div>
+                            </div>`;
+            poularArtists += artistItem;
+        });
+    }
+    artistsGrid.innerHTML = poularArtists;
+}
+async function Tracks(path) {
+    const res = await httpRequest.get(path);
+    const tracksGrid = document.querySelector(".hits-grid");
+    let popularTracks = "";
+    if (res) {
+        res.tracks.forEach((track) => {
+            const trackItem = `<div class="hit-card" data-id="${EscapeHtml(
+                track.id
+            )}">
+                                <div class="hit-card-cover">
+                                    <img
+                                        src="${EscapeHtml(track.image_url)}"
+                                        alt="${EscapeHtml(track.title)}"
+                                        onerror=" this.onerror=null ;this.src='${EscapeHtml(
+                                            track.artist_image_url
+                                        )}';"
+                                    />
+                                    <button class="hit-play-btn">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                                <div class="hit-card-info">
+                                    <h3 class="hit-card-title">${EscapeHtml(
+                                        track.title
+                                    )}</h3>
+                                    <p class="hit-card-artist">${EscapeHtml(
+                                        track.artist_name
+                                    )}</p>
+                                </div>
+                            </div>`;
+            popularTracks += trackItem;
+        });
+    }
+    tracksGrid.innerHTML = popularTracks;
+}
+// Render user avatar and name in the header
 function RenderAvatar(user, isLogin = false) {
     const authButtons = document.querySelector(".auth-buttons");
     const userMenu = document.querySelector(".user-menu");
     const userInfo = document.querySelector(".user-info");
+    const libraryContent = document.querySelector(".library-content");
     if (isLogin) {
         authButtons.classList.remove("show");
         userMenu.classList.add("show");
+        libraryContent.classList.add("show");
         userInfo.innerHTML = `   
       <button class="user-avatar" id="userAvatar">                            
          <img src="${
@@ -206,8 +342,10 @@ function RenderAvatar(user, isLogin = false) {
     } else {
         authButtons.classList.add("show");
         userMenu.classList.remove("show");
+        libraryContent.classList.remove("show");
     }
 }
+// Function to escape HTML characters
 function EscapeHtml(str) {
     const div = document.createElement("div");
     div.textContent = str;
