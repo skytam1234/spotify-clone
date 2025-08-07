@@ -9,6 +9,15 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/tippy.js@5/animations/scale.css"
+    />
+
     <link rel="stylesheet" href="css/reset.css" />
     <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/components.css" />
@@ -171,7 +180,6 @@
                     class="user-avatar-img"
                   />
                 </button>
-                <div class="user-name" id="userName"></div>
               </div>
               <div class="user-dropdown" id="userDropdown">
                 <div class="dropdown-item" id="logoutBtn">
@@ -285,7 +293,7 @@
             </div>
           </section>
         </div>
-        <section class="playlist-empty">
+        <!-- <section class="playlist-empty">
           <div class="playlist-header">
             <i class="playlist-icon"></i>
             <span class="playlist-title">Danh sách phát của tôi #4</span>
@@ -302,7 +310,7 @@
               <span>&times;</span>
             </button>
           </div>
-        </section>
+        </section> -->
       </main>
 
       <!-- Bottom Player -->
@@ -468,7 +476,10 @@
         </div>
       </div>
     </div>
-
+    <!-- JS -->
+    <script src="https://unpkg.com/popper.js@1"></script>
+    <script src="https://unpkg.com/tippy.js@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
     <script src="main.js" type="module"></script>
   </body>
 </html>
