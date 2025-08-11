@@ -22,12 +22,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     const createPlaylistModal = document.querySelector(".create-btn");
     const playlistDropdown = document.querySelector(".playlist-dropdown");
 
+    const contentWrapper = document.querySelector(".content-wrapper");
+
     const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
     const navArtistsBtn = document.querySelector(".nav-artists-btn");
-
     const libraryContent = document.querySelector(".library-content");
-    const contentWrapper = document.querySelector(".content-wrapper");
-    const playlistEmpty = document.querySelector(".playlist-empty");
+
+    const artistHero = document.querySelector(".artist-hero");
+    const artistControls = document.querySelector(".artist-controls");
+    const popularSection = document.querySelector(".popular-section");
+    const hitsSection = document.querySelector(".hits-section");
+    const artistsSection = document.querySelector(".artists-section");
+    const playlistSection = document.querySelector(".playlist-section");
+    const playlistHeader = document.querySelector(".playlist-header");
+
+    const trackList = document.querySelector(".track-list");
 
     // Function to show signup form
     function showSignupForm() {
@@ -178,31 +187,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
     // Load lại danh sách playlist của mình
     navPlaylistBtn.addEventListener("click", function () {
-        const myPlaylists = localStorage.getItem("myPlaylists");
-        if (myPlaylists) {
-            navPlaylistBtn.classList.add("active");
-            navArtistsBtn.classList.remove("active");
-            const Playlists = JSON.parse(myPlaylists);
-            Playlists.forEach((playlist) => {
-                const playlistItem = document.createElement("div");
-                playlistItem.innerHTML = `<div class="library-item" data-id="${EscapeHtml(
-                    playlist.id
-                )}">
-              <img
-                src="${
-                    EscapeHtml(playlist.image_url) || "placeholder.png"
-                }?height=48&width=48"
-                alt="${playlist.name}"
-                class="item-image" onerror=" this.onerror=null ;this.src='../placeholder.png';"
-              />
-              <div class="item-info">
-                <div class="item-title">${playlist.name}</div>
-                <div class="item-subtitle">${playlist.description}</div>
-              </div>
-            </div>`;
-                libraryContent.appendChild(playlistItem);
-            });
-        }
+        renderMyPlayList();
     });
     // load lại danh sách artist đã follow, chua co API de lam
     navArtistsBtn.addEventListener("click", async function () {
@@ -211,45 +196,100 @@ document.addEventListener("DOMContentLoaded", async function () {
         } else {
         }
     });
+    //xử lý click vào libraryContent để mở ra 1 bộ sưu tập
     libraryContent.addEventListener("click", async function (e) {
         e.preventDefault;
         const libraryItemOld = libraryContent.querySelector(
             ".library-item.active"
         );
-        libraryItemOld.classList.remove(`active`);
+        libraryItemOld?.classList.remove(`active`);
         const libraryItem = e.target.closest(".library-item");
+
         if (libraryItem) {
             const id = libraryItem.dataset.id;
+            const playlistHeader = document.querySelector(".playlist-header");
             try {
+                // lấy tạm playlist theo id và lấy  tracks trend để render, sau này thì phải đổi lại thành tracks của playlist
                 const playlist = await httpRequest.get(`playlists/${id}`);
-                contentWrapper.classList.remove("show");
-                playlistEmpty.innerHTML = `<section class="playlist-empty show">
+                const tracks = await httpRequest.get("tracks/trending");
+                console.log(tracks);
+
+                if (tracks.tracks.length > 0) {
+                    trackList.innerHTML = "";
+                    let html = "";
+                    tracks.tracks.forEach((track) => {
+                        html += `<div class="track-item">
+                                <div class="track-number">
+                                    <i
+                                        class="fas fa-volume-up playing-icon"
+                                    ></i>
+                                </div>
+                                <div class="track-image">
+                                    <img
+                                        src="placeholder.svg?height=40&width=40"
+                                        alt="Lối Nhỏ"
+                                    />
+                                </div>
+                                <div class="track-info">
+                                    <div class="track-name playing-text">
+                                        Lối Nhỏ
+                                    </div>
+                                </div>
+                                <div class="track-plays">45,686,866</div>
+                                <div class="track-duration">4:12</div>
+                                <button class="track-menu-btn">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>`;
+                    });
+                    trackList.innerHTML = html;
+                    toggleMainContent(1);
+                } else {
+                    hitsSection.classList.remove("show");
+                    artistsSection.classList.remove("show");
+                    artistHero.classList.remove("show");
+                    artistControls.classList.remove("show");
+                    popularSection.classList.remove("show");
+                    playlistSection.classList.add("show");
+                    playlistHeader.classList.add("show");
+                }
+                playlistSection.innerHTML = `
                     <div class="playlist-header">
                         <i class="playlist-icon"></i>
                         <span class="playlist-title">${EscapeHtml(
                             playlist.name
-                        )}</span>                                                 
+                        )}</span>
                     </div>
                     <hr class="playlist-divider" />
                     <div class="playlist-content">
                         <h2 class="playlist-heading">
-                            ${playlist.description}
+                            Danh sách bài hát
                         </h2>
                         <div class="playlist-search">
                             <input
                                 type="text"
                                 placeholder="Tìm bài hát"
-                                class=""
+                                class="myPlaylist-search"
                             />
                         </div>
                         <button class="playlist-close">
                             <span>&times;</span>
                         </button>
                     </div>
-                </section>`;
+                `;
             } catch (error) {}
-            playlistEmpty.classList.add("show");
+
             libraryItem.classList.add(`active`);
+        }
+    });
+    contentWrapper.addEventListener("click", async function (e) {
+        const closePlaylist = e.target.closest(".playlist-close");
+        const addTracksBtn = e.target.closest(".add-tracks-btn");
+        if (closePlaylist) {
+            playlistSection.classList.toggle("show");
+        }
+        if (addTracksBtn) {
+            playlistSection.classList.toggle("show");
         }
     });
 });
@@ -300,12 +340,44 @@ document.addEventListener("DOMContentLoaded", async function () {
     // TODO: Implement other functionality here
     await renderUserInfo();
     await renderMyPlayList();
+    toggleMainContent(0);
 });
+function toggleMainContent(code) {
+    const artistHero = document.querySelector(".artist-hero");
+    const artistControls = document.querySelector(".artist-controls");
+    const popularSection = document.querySelector(".popular-section");
+    const hitsSection = document.querySelector(".hits-section");
+    const artistsSection = document.querySelector(".artists-section");
+    const playlistSection = document.querySelector(".playlist-section");
+    if (code === 0) {
+        artistHero.classList.remove("show");
+        artistControls.classList.remove("show");
+        popularSection.classList.remove("show");
+        hitsSection.classList.add("show");
+        artistsSection.classList.add("show");
+        playlistSection.classList.remove("show");
+        return;
+    }
+    if (code === 1) {
+        artistHero.classList.add("show");
+        artistControls.classList.add("show");
+        popularSection.classList.add("show");
+        hitsSection.classList.remove("show");
+        artistsSection.classList.remove("show");
+        playlistSection.classList.remove("show");
+        return;
+    }
+    if (code === 2) {
+        playlistEmpty.classList.toggle("show");
+        return;
+    }
+}
 async function addTracksToPlaylists() {}
 async function renderMyPlayList() {
     const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
     const navArtistsBtn = document.querySelector(".nav-artists-btn");
     const libraryContent = document.querySelector(".library-content");
+    libraryContent.innerHTML = `<div class="library-content"></div>`;
     const myPlaylists = localStorage.getItem("myPlaylists");
     if (myPlaylists) {
         navPlaylistBtn.classList.add("active");

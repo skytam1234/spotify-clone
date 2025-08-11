@@ -119,14 +119,11 @@
 }
 
 .content-wrapper {
-    display: none;
     flex: 1;
     padding: 0 var(--spacing-lg) var(--spacing-lg);
     overflow-y: auto;
 }
-.content-wrapper.show {
-    display: block;
-}
+
 .artist-hero {
     display: none;
 }
@@ -144,6 +141,29 @@
 }
 .popular-section.show {
     display: block;
+}
+.hits-section {
+    display: none;
+}
+.hits-section.show {
+    display: block;
+}
+.artists-section {
+    display: none;
+}
+.artists-section.show {
+    display: block;
+}
+.add-tracks {
+    display: flex;
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.add-tracks-btn {
+    margin-left: auto;
 }
 
 /* Player */
@@ -412,17 +432,21 @@
     margin: 0;
     font-size: 14px;
 }
-.playlist-empty {
+.playlist-section {
     display: none;
     background: transparent;
     border-radius: 12px;
-    padding: 32px 40px;
-    position: relative;
     height: 100%;
     color: #fff;
 }
-.playlist-empty.show {
+.playlist-section.show {
     display: block;
+}
+.playlist-section .playlist-header {
+    display: none;
+}
+.playlist-section .playlist-header.show {
+    display: flex;
 }
 
 .playlist-header {
