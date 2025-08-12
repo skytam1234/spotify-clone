@@ -785,7 +785,9 @@
     gap: var(--spacing-lg);
     margin-bottom: var(--spacing-xl);
 }
-
+.form-group:has(:invalid:not(:placeholder-shown)) .error-message {
+    visibility: visible;
+}
 .form-group {
     text-align: left;
 }
@@ -813,12 +815,12 @@
 
 /* Error Message */
 .error-message {
-    display: none;
     align-items: center;
     gap: var(--spacing-sm);
     margin-top: var(--spacing-sm);
     color: #f87171;
     font-size: 14px;
+    visibility: hidden;
 }
 
 .error-message i {

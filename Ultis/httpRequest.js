@@ -27,7 +27,10 @@ class HttpRequest {
             }
             return responseData;
         } catch (error) {
-            throw error;
+            const message = error.response.error.details
+                ? error.response.error.details[0].message
+                : error.response.error.message;
+            throw message;
         }
     }
     async get(path, option) {

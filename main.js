@@ -27,6 +27,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
     const navArtistsBtn = document.querySelector(".nav-artists-btn");
     const libraryContent = document.querySelector(".library-content");
+    const searchLibraryBtn = document.querySelector(".search-library-btn");
+    const searchLibrary = document.querySelector("#searchLibrary");
+    const dropdownSearchLibrary = document.querySelector(
+        ".dropdown-search-library"
+    );
 
     const artistHero = document.querySelector(".artist-hero");
     const artistControls = document.querySelector(".artist-controls");
@@ -75,7 +80,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     // Close modal when clicking close button
-    modalClose.addEventListener("click", closeModal);
+    modalClose.addEventListener("click", () => {
+        authFormLogin.reset();
+        authFormSignup.reset();
+        closeModal();
+    });
 
     // Close modal when clicking overlay (outside modal container)
     authModal.addEventListener("click", function (e) {
@@ -103,6 +112,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     //đăng ký
     authFormSignup.addEventListener("submit", async function (e) {
         e.preventDefault();
+        let isSuccess = false;
         const certificate = {
             email: signupEmail.value,
             username: signupEmail.value.split("@")[0],
@@ -112,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             country: "US",
         };
         try {
-            const { user, access_token } = await httpRequest.post(
+            const { user, access_token, message } = await httpRequest.post(
                 "auth/register",
                 certificate
             );
@@ -120,25 +130,29 @@ document.addEventListener("DOMContentLoaded", async function () {
             localStorage.setItem("user", JSON.stringify(user));
             iziToast.success({
                 title: "OK",
-                message: "Thông báo đăng ký thành công!",
+                message: message,
                 position: "topCenter",
             });
-            this.reset(); // Reset the form fields
+            this.reset();
             closeModal();
-            renderUserInfo(); // Update user info in the UI
+            renderUserInfo();
+            isSuccess = true;
         } catch (error) {
-            console.error("Error during signup:", error);
             iziToast.error({
                 title: "Error",
-                message:
-                    "Đăng ký thất bại! Vui lòng kiểm tra lại thông tin đăng ký.",
+                message: error,
                 position: "topCenter",
             });
+        }
+        if (isSuccess) {
+            await getMyPlayLists();
+            myPlaylist();
         }
     });
     // Đăng nhập
     authFormLogin.addEventListener("submit", async function (e) {
         e.preventDefault();
+        let isSuccess = false;
         const certificate = {
             email: loginEmail.value,
             password: loginPassword.value,
@@ -158,6 +172,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             this.reset(); // Reset the form fields
             closeModal();
             renderUserInfo(); // Update user info in the UI
+            isSuccess = true;
         } catch (error) {
             console.error("Error during login:", error);
             iziToast.error({
@@ -166,6 +181,10 @@ document.addEventListener("DOMContentLoaded", async function () {
                     "Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin đăng nhập.",
                 position: "topCenter",
             });
+        }
+        if (isSuccess) {
+            await getMyPlayLists();
+            myPlaylist();
         }
     });
     //Dang nhap de tao playlist
@@ -187,14 +206,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
     // Load lại danh sách playlist của mình
     navPlaylistBtn.addEventListener("click", function () {
-        renderMyPlayList();
+        myPlaylist();
     });
     // load lại danh sách artist đã follow, chua co API de lam
     navArtistsBtn.addEventListener("click", async function () {
-        const user = localStorage.getItem("user");
-        if (user) {
-        } else {
-        }
+        await myArtistFollows();
     });
     //xử lý click vào libraryContent để mở ra 1 bộ sưu tập
     libraryContent.addEventListener("click", async function (e) {
@@ -202,7 +218,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         const libraryItemOld = libraryContent.querySelector(
             ".library-item.active"
         );
-        libraryItemOld?.classList.remove(`active`);
+        const dropdownSearchLibrary =
+            libraryItemOld?.classList.remove(`active`);
         const libraryItem = e.target.closest(".library-item");
 
         if (libraryItem) {
@@ -217,12 +234,11 @@ document.addEventListener("DOMContentLoaded", async function () {
                 if (tracks.tracks.length > 0) {
                     trackList.innerHTML = "";
                     let html = "";
+                    //thêm <i class="fas fa-volume-up playing-icon"></i>  vào tracks-number sẽ có cá loa
                     tracks.tracks.forEach((track) => {
                         html += `<div class="track-item">
                                 <div class="track-number">
-                                    <i
-                                        class="fas fa-volume-up playing-icon"
-                                    ></i>
+                                                                                                           
                                 </div>
                                 <div class="track-image">
                                     <img
@@ -292,6 +308,20 @@ document.addEventListener("DOMContentLoaded", async function () {
             playlistSection.classList.toggle("show");
         }
     });
+    searchLibraryBtn.addEventListener("click", () => {
+        searchLibrary.value = "";
+        searchLibrary.focus();
+        dropdownSearchLibrary.classList.toggle("open");
+    });
+
+    searchLibrary.addEventListener("input", (e) => {
+        console.log(e);
+        clearTimeout(time);
+        const time = setTimeout(() => {
+            const a = searchLibrary.value;
+            console.log(a);
+        }, 1000);
+    });
 });
 
 // User Menu Dropdown Functionality
@@ -324,13 +354,16 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Handle logout button click
-    logoutBtn.addEventListener("click", function () {
+    logoutBtn.addEventListener("click", async function () {
         // Close dropdown first
+        await httpRequest.post("auth/logout");
         userDropdown.classList.remove("show");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
-        renderUserInfo(); // Update user info in the UI
-
+        localStorage.removeItem("myPlaylists");
+        localStorage.removeItem("artistsFollows");
+        renderUserInfo();
+        await httpRequest.post("auth/logout");
         // TODO: Students will implement logout logic here
     });
 });
@@ -338,52 +371,84 @@ document.addEventListener("DOMContentLoaded", function () {
 // Other functionality
 document.addEventListener("DOMContentLoaded", async function () {
     // TODO: Implement other functionality here
+    toggleMainContent(true, true);
+    await tracksTrending();
+    await artistsTrending();
     await renderUserInfo();
-    await renderMyPlayList();
-    toggleMainContent(0);
+    const myPlaylists = JSON.parse(localStorage.getItem("myPlaylists"));
+    if (myPlaylists) {
+        myPlaylist();
+    }
 });
-function toggleMainContent(code) {
+function toggleMainContent(
+    hitsSectionShow,
+    artistsSectionShow,
+    artistHeroShow,
+    artistControlsShow,
+    popularSectionShow,
+    playlistSectionShow
+) {
     const artistHero = document.querySelector(".artist-hero");
     const artistControls = document.querySelector(".artist-controls");
     const popularSection = document.querySelector(".popular-section");
     const hitsSection = document.querySelector(".hits-section");
     const artistsSection = document.querySelector(".artists-section");
     const playlistSection = document.querySelector(".playlist-section");
-    if (code === 0) {
-        artistHero.classList.remove("show");
-        artistControls.classList.remove("show");
-        popularSection.classList.remove("show");
-        hitsSection.classList.add("show");
-        artistsSection.classList.add("show");
-        playlistSection.classList.remove("show");
-        return;
-    }
-    if (code === 1) {
-        artistHero.classList.add("show");
-        artistControls.classList.add("show");
-        popularSection.classList.add("show");
-        hitsSection.classList.remove("show");
-        artistsSection.classList.remove("show");
-        playlistSection.classList.remove("show");
-        return;
-    }
-    if (code === 2) {
-        playlistEmpty.classList.toggle("show");
-        return;
-    }
+    artistHeroShow
+        ? artistHero.classList.add("show")
+        : artistHero.classList.remove("show");
+    artistControlsShow
+        ? artistControls.classList.add("show")
+        : artistControls.classList.remove("show");
+    popularSectionShow
+        ? popularSection.classList.add("show")
+        : popularSection.classList.remove("show");
+    hitsSectionShow
+        ? hitsSection.classList.add("show")
+        : hitsSection.classList.remove("show");
+    artistsSectionShow
+        ? artistsSection.classList.add("show")
+        : artistsSection.classList.remove("show");
+    playlistSectionShow
+        ? playlistSection.classList.add("show")
+        : playlistSection.classList.remove("show");
 }
 async function addTracksToPlaylists() {}
-async function renderMyPlayList() {
+
+async function renderUserInfo() {
+    const authButtons = document.querySelector(".auth-buttons");
+    const userMenu = document.querySelector(".user-menu");
+    const userAvatar = document.querySelector(".user-avatar-img");
+    try {
+        const { user } = await httpRequest.get("users/me");
+        localStorage.setItem("user", JSON.stringify(user));
+        authButtons.classList.remove("show");
+        userMenu.classList.add("show");
+        userAvatar.src = `${user.avatar_url || "placeholder.png"}`;
+        tippy("#userAvatar", {
+            content: `${user.display_name || user.username}`,
+        });
+    } catch (error) {
+        authButtons.classList.add("show");
+        userMenu.classList.remove("show");
+    }
+}
+async function getMyPlayLists() {
+    try {
+        const { playlists } = await httpRequest.get("me/playlists");
+        localStorage.setItem("myPlaylists", JSON.stringify(playlists));
+    } catch (error) {}
+}
+function myPlaylist() {
+    const playlists = JSON.parse(localStorage.getItem("myPlaylists"));
     const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
     const navArtistsBtn = document.querySelector(".nav-artists-btn");
     const libraryContent = document.querySelector(".library-content");
     libraryContent.innerHTML = `<div class="library-content"></div>`;
-    const myPlaylists = localStorage.getItem("myPlaylists");
-    if (myPlaylists) {
+    if (playlists) {
         navPlaylistBtn.classList.add("active");
         navArtistsBtn.classList.remove("active");
-        const Playlists = JSON.parse(myPlaylists);
-        Playlists.forEach((playlist) => {
+        playlists.forEach((playlist) => {
             const playlistItem = document.createElement("div");
             playlistItem.innerHTML = `<div class="library-item" data-id="${EscapeHtml(
                 playlist.id
@@ -405,42 +470,48 @@ async function renderMyPlayList() {
     }
 }
 
-async function renderUserInfo() {
-    const authButtons = document.querySelector(".auth-buttons");
-    const userMenu = document.querySelector(".user-menu");
-    const userAvatar = document.querySelector(".user-avatar-img");
-    await renderMainContent();
+async function getArtistFollows() {
     try {
-        const { user } = await httpRequest.get("users/me");
-        localStorage.setItem("user", JSON.stringify(user));
-        authButtons.classList.remove("show");
-        userMenu.classList.add("show");
-        userAvatar.src = `${user.avatar_url || "placeholder.png"}`;
-        await getMyPlayLists();
-        tippy("#userAvatar", {
-            content: `${user.display_name || user.username}`,
-        });
-    } catch (error) {
-        authButtons.classList.add("show");
-        userMenu.classList.remove("show");
-    }
-}
-async function getMyPlayLists() {
-    try {
-        const { playlists } = await httpRequest.get("me/playlists");
-        localStorage.setItem("myPlaylists", JSON.stringify(playlists));
+        // chưa có API nên  lấy all artistsFollow
+        const { artists } = await httpRequest.get("artists?limit=20&offset=0");
+        return artists;
     } catch (error) {}
 }
-async function renderMainContent() {
-    const contentWrapper = document.querySelector(".content-wrapper");
-    contentWrapper.classList.add("show");
-    await Artists("artists/trending");
-    await Tracks("tracks/popular");
+async function myArtistFollows() {
+    const artistFollows = await getArtistFollows();
+    console.log(artistFollows);
+    const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
+    const navArtistsBtn = document.querySelector(".nav-artists-btn");
+    const libraryContent = document.querySelector(".library-content");
+    libraryContent.innerHTML = `<div class="library-content"></div>`;
+    if (artistFollows) {
+        navPlaylistBtn.classList.remove("active");
+        navArtistsBtn.classList.add("active");
+        artistFollows.forEach((artist) => {
+            const artistItem = document.createElement("div");
+            artistItem.innerHTML = `<div class="library-item" data-id="${EscapeHtml(
+                artist.id
+            )}">
+              <img
+                src="${
+                    EscapeHtml(artist.image_url) || "placeholder.png"
+                }?height=48&width=48"
+                alt="${artist.name}"
+                class="item-image" onerror=" this.onerror=null ;this.src='../placeholder.png';"
+              />
+              <div class="item-info">
+                <div class="item-title">${artist.name}</div>
+                <div class="item-subtitle">${artist.description}</div>
+              </div>
+            </div>`;
+            libraryContent.appendChild(artistItem);
+        });
+    }
 }
-async function Artists(path) {
-    const res = await httpRequest.get(path);
+async function artistsTrending() {
+    const res = await httpRequest.get("artists/trending?limit=20");
     const artistsGrid = document.querySelector(".artists-grid");
-    let poularArtists = "";
+    let popularArtists = "";
     if (res) {
         res.artists.forEach((artist) => {
             const artistItem = `<div class="artist-card" data-id="${EscapeHtml(
@@ -464,13 +535,13 @@ async function Artists(path) {
                                     <p class="artist-card-type">Ca sĩ</p>
                                 </div>
                             </div>`;
-            poularArtists += artistItem;
+            popularArtists += artistItem;
         });
     }
-    artistsGrid.innerHTML = poularArtists;
+    artistsGrid.innerHTML = popularArtists;
 }
-async function Tracks(path) {
-    const res = await httpRequest.get(path);
+async function tracksTrending() {
+    const res = await httpRequest.get("tracks/trending?limit=20");
     const tracksGrid = document.querySelector(".hits-grid");
     let popularTracks = "";
     if (res) {
