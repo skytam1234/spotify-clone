@@ -305,6 +305,7 @@
 }
 
 .item-info {
+    overflow: hidden;
     flex: 1;
     min-width: 0;
 }
@@ -328,6 +329,17 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
+    display: inline-block;
+    animation: scrollText 30s linear infinite;
+}
+
+@keyframes scrollText {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
 }
 
 .item-subtitle i {

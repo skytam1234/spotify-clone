@@ -2,239 +2,285 @@ import httpRequest from "./Ultis/httpRequest.js";
 
 // Auth Modal Functionality
 document.addEventListener("DOMContentLoaded", async function () {
-  // Get DOM elements
-  const signupBtn = document.querySelector(".signup-btn");
-  const loginBtn = document.querySelector(".login-btn");
-  const authModal = document.getElementById("authModal");
-  const modalClose = document.getElementById("modalClose");
-  const signupForm = document.getElementById("signupForm");
-  const authFormSignup = document.querySelector(".auth-form-signup");
-  const signupEmail = document.getElementById("signupEmail");
-  const signupPassword = document.getElementById("signupPassword");
+    // Get DOM elements
+    const signupBtn = document.querySelector(".signup-btn");
+    const loginBtn = document.querySelector(".login-btn");
+    const authModal = document.getElementById("authModal");
+    const modalClose = document.getElementById("modalClose");
+    const signupForm = document.getElementById("signupForm");
+    const authFormSignup = document.querySelector(".auth-form-signup");
+    const signupEmail = document.getElementById("signupEmail");
+    const signupPassword = document.getElementById("signupPassword");
 
-  const authFormLogin = document.querySelector(".auth-form-login");
-  const loginForm = document.getElementById("loginForm");
-  const loginEmail = document.getElementById("loginEmail");
-  const loginPassword = document.getElementById("loginPassword");
+    const authFormLogin = document.querySelector(".auth-form-login");
+    const loginForm = document.getElementById("loginForm");
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPassword = document.getElementById("loginPassword");
 
-  const showLoginBtn = document.getElementById("showLogin");
-  const showSignupBtn = document.getElementById("showSignup");
-  const createPlaylistModal = document.querySelector(".create-btn");
-  const playlistDropdown = document.querySelector(".playlist-dropdown");
+    const showLoginBtn = document.getElementById("showLogin");
+    const showSignupBtn = document.getElementById("showSignup");
+    //const navSection = document.querySelector(".nav-section");
+    const createPlaylistModal = document.querySelector(".create-btn");
+    const playlistDropdown = document.querySelector(".playlist-dropdown");
 
-  const contentWrapper = document.querySelector(".content-wrapper");
+    const contentWrapper = document.querySelector(".content-wrapper");
 
-  const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
-  const navArtistsBtn = document.querySelector(".nav-artists-btn");
-  const libraryContent = document.querySelector(".library-content");
-  const searchLibraryBtn = document.querySelector(".search-library-btn");
-  const searchLibrary = document.querySelector("#searchLibrary");
-  const dropdownSearchLibrary = document.querySelector(
-    ".dropdown-search-library"
-  );
+    const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
+    const navArtistsBtn = document.querySelector(".nav-artists-btn");
+    const libraryContent = document.querySelector(".library-content");
+    const searchLibraryBtn = document.querySelector(".search-library-btn");
+    const searchLibrary = document.querySelector("#searchLibrary");
+    const dropdownSearchLibrary = document.querySelector(
+        ".dropdown-search-library"
+    );
+    const searchInput = document.querySelector(".search-input");
 
-  const artistHero = document.querySelector(".artist-hero");
-  const artistControls = document.querySelector(".artist-controls");
-  const popularSection = document.querySelector(".popular-section");
-  const hitsSection = document.querySelector(".hits-section");
-  const artistsSection = document.querySelector(".artists-section");
-  const playlistSection = document.querySelector(".playlist-section");
-  const playlistHeader = document.querySelector(".playlist-header");
+    const artistHero = document.querySelector(".artist-hero");
+    const artistControls = document.querySelector(".artist-controls");
+    const popularSection = document.querySelector(".popular-section");
+    const hitsSection = document.querySelector(".hits-section");
+    const artistsSection = document.querySelector(".artists-section");
+    const playlistSection = document.querySelector(".playlist-section");
+    const playlistHeader = document.querySelector(".playlist-header");
 
-  const trackList = document.querySelector(".track-list");
+    const trackList = document.querySelector(".track-list");
 
-  // Function to show signup form
-  function showSignupForm() {
-    signupForm.style.display = "block";
-    loginForm.style.display = "none";
-  }
-
-  // Function to show login form
-  function showLoginForm() {
-    signupForm.style.display = "none";
-    loginForm.style.display = "block";
-  }
-
-  // Function to open modal
-  function openModal() {
-    authModal.classList.add("show");
-    document.body.style.overflow = "hidden"; // Prevent background scrolling
-  }
-
-  // Open modal with Sign Up form when clicking Sign Up button
-  signupBtn.addEventListener("click", function () {
-    showSignupForm();
-    openModal();
-  });
-
-  // Open modal with Login form when clicking Login button
-  loginBtn.addEventListener("click", function () {
-    showLoginForm();
-    openModal();
-  });
-
-  // Close modal function
-  function closeModal() {
-    authModal.classList.remove("show");
-    document.body.style.overflow = "auto"; // Restore scrolling
-  }
-
-  // Close modal when clicking close button
-  modalClose.addEventListener("click", () => {
-    authFormLogin.reset();
-    authFormSignup.reset();
-    closeModal();
-  });
-
-  // Close modal when clicking overlay (outside modal container)
-  authModal.addEventListener("click", function (e) {
-    if (e.target === authModal) {
-      closeModal();
+    // Function to show signup form
+    function showSignupForm() {
+        signupForm.style.display = "block";
+        loginForm.style.display = "none";
     }
-  });
 
-  // Close modal with Escape key
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && authModal.classList.contains("show")) {
-      closeModal();
+    // Function to show login form
+    function showLoginForm() {
+        signupForm.style.display = "none";
+        loginForm.style.display = "block";
     }
-  });
 
-  // Switch to Login form
-  showLoginBtn.addEventListener("click", function () {
-    showLoginForm();
-  });
+    // Function to open modal
+    function openModal() {
+        authModal.classList.add("show");
+        document.body.style.overflow = "hidden"; // Prevent background scrolling
+    }
 
-  // Switch to Signup form
-  showSignupBtn.addEventListener("click", function () {
-    showSignupForm();
-  });
-  //đăng ký
-  authFormSignup.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    let isSuccess = false;
-    const certificate = {
-      email: signupEmail.value,
-      username: signupEmail.value.split("@")[0],
-      password: signupPassword.value,
-      display_name: signupEmail.value.split("@")[0],
-      bio: "Test bio",
-      country: "US",
-    };
-    try {
-      const { user, access_token, message } = await httpRequest.post(
-        "auth/register",
-        certificate
-      );
-      localStorage.setItem("accessToken", access_token);
-      localStorage.setItem("user", JSON.stringify(user));
-      iziToast.success({
-        title: "OK",
-        message: message,
-        position: "topCenter",
-      });
-      this.reset();
-      closeModal();
-      renderUserInfo();
-      isSuccess = true;
-    } catch (error) {
-      iziToast.error({
-        title: "Error",
-        message: error,
-        position: "topCenter",
-      });
-    }
-    if (isSuccess) {
-      await getMyPlayLists();
-      myPlaylist();
-    }
-  });
-  // Đăng nhập
-  authFormLogin.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    let isSuccess = false;
-    const certificate = {
-      email: loginEmail.value,
-      password: loginPassword.value,
-    };
-    try {
-      const { user, access_token } = await httpRequest.post(
-        "auth/login",
-        certificate
-      );
-      localStorage.setItem("accessToken", access_token);
-      localStorage.setItem("user", JSON.stringify(user));
-      iziToast.success({
-        title: "OK",
-        message: "Thông báo đăng nhập thành công!",
-        position: "topCenter",
-      });
-      this.reset(); // Reset the form fields
-      closeModal();
-      renderUserInfo(); // Update user info in the UI
-      isSuccess = true;
-    } catch (error) {
-      console.error("Error during login:", error);
-      iziToast.error({
-        title: "Error",
-        message:
-          "Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin đăng nhập.",
-        position: "topCenter",
-      });
-    }
-    if (isSuccess) {
-      await getMyPlayLists();
-      myPlaylist();
-    }
-  });
-  //Dang nhap de tao playlist
-  createPlaylistModal.addEventListener("click", async function () {
-    const user = localStorage.getItem("user");
-    if (user) {
-      playlistDropdown.style.top = this.offsetHeight + "px";
-      playlistDropdown.style.left = this.offsetLeft + "px";
-      playlistDropdown.classList.toggle("show");
-    } else {
-      showLoginForm();
-      openModal();
-      iziToast.error({
-        title: "Error",
-        message: "Vui lòng đăng nhập để tạo playlist!",
-        position: "topCenter",
-      });
-    }
-  });
-  // Load lại danh sách playlist của mình
-  navPlaylistBtn.addEventListener("click", function () {
-    const playlists = JSON.parse(localStorage.getItem("myPlaylists"));
-    myPlaylist([playlists]);
-  });
-  // load lại danh sách artist đã follow, chua co API de lam
-  navArtistsBtn.addEventListener("click", async function () {
-    await myArtistFollows();
-  });
-  //xử lý click vào libraryContent để mở ra 1 bộ sưu tập
-  libraryContent.addEventListener("click", async function (e) {
-    e.preventDefault;
-    const libraryItemOld = libraryContent.querySelector(".library-item.active");
-    const dropdownSearchLibrary = libraryItemOld?.classList.remove(`active`);
-    const libraryItem = e.target.closest(".library-item");
+    // Open modal with Sign Up form when clicking Sign Up button
+    signupBtn.addEventListener("click", function () {
+        showSignupForm();
+        openModal();
+    });
 
-    if (libraryItem) {
-      const id = libraryItem.dataset.id;
-      const playlistHeader = document.querySelector(".playlist-header");
-      try {
-        // lấy tạm playlist theo id và lấy  tracks trend để render, sau này thì phải đổi lại thành tracks của playlist
-        const playlist = await httpRequest.get(`playlists/${id}`);
-        const tracks = await httpRequest.get("tracks/trending");
-        console.log(tracks);
+    // Open modal with Login form when clicking Login button
+    loginBtn.addEventListener("click", function () {
+        showLoginForm();
+        openModal();
+    });
 
-        if (tracks.tracks.length > 0) {
-          trackList.innerHTML = "";
-          let html = "";
-          //thêm <i class="fas fa-volume-up playing-icon"></i>  vào tracks-number sẽ có cá loa
-          tracks.tracks.forEach((track) => {
-            html += `<div class="track-item">
+    // Close modal function
+    function closeModal() {
+        authModal.classList.remove("show");
+        document.body.style.overflow = "auto"; // Restore scrolling
+    }
+
+    // Close modal when clicking close button
+    modalClose.addEventListener("click", () => {
+        authFormLogin.reset();
+        authFormSignup.reset();
+        closeModal();
+    });
+
+    // Close modal when clicking overlay (outside modal container)
+    authModal.addEventListener("click", function (e) {
+        if (e.target === authModal) {
+            closeModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && authModal.classList.contains("show")) {
+            closeModal();
+        }
+    });
+
+    // Switch to Login form
+    showLoginBtn.addEventListener("click", function () {
+        showLoginForm();
+    });
+
+    // Switch to Signup form
+    showSignupBtn.addEventListener("click", function () {
+        showSignupForm();
+    });
+    //đăng ký
+    authFormSignup.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        let isSuccess = false;
+        const certificate = {
+            email: signupEmail.value,
+            username: signupEmail.value.split("@")[0],
+            password: signupPassword.value,
+            display_name: signupEmail.value.split("@")[0],
+            bio: "Test bio",
+            country: "US",
+        };
+        try {
+            const { user, access_token, message } = await httpRequest.post(
+                "auth/register",
+                certificate
+            );
+            localStorage.setItem("accessToken", access_token);
+            localStorage.setItem("user", JSON.stringify(user));
+            iziToast.success({
+                title: "OK",
+                message: message,
+                position: "topCenter",
+            });
+            this.reset();
+            closeModal();
+            renderUserInfo();
+            isSuccess = true;
+        } catch (error) {
+            iziToast.error({
+                title: "Error",
+                message: error,
+                position: "topCenter",
+            });
+        }
+        if (isSuccess) {
+            const playlist = await getMyPlayLists();
+            myPlaylist([playlist]);
+        }
+    });
+    // Đăng nhập
+    authFormLogin.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        let isSuccess = false;
+        const certificate = {
+            email: loginEmail.value,
+            password: loginPassword.value,
+        };
+        try {
+            const { user, access_token } = await httpRequest.post(
+                "auth/login",
+                certificate
+            );
+            localStorage.setItem("accessToken", access_token);
+            localStorage.setItem("user", JSON.stringify(user));
+            iziToast.success({
+                title: "OK",
+                message: "Thông báo đăng nhập thành công!",
+                position: "topCenter",
+            });
+            this.reset(); // Reset the form fields
+            closeModal();
+            renderUserInfo(); // Update user info in the UI
+            isSuccess = true;
+        } catch (error) {
+            console.error("Error during login:", error);
+            iziToast.error({
+                title: "Error",
+                message:
+                    "Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin đăng nhập.",
+                position: "topCenter",
+            });
+        }
+        if (isSuccess) {
+            const playlist = await getMyPlayLists();
+            myPlaylist([playlist]);
+        }
+    });
+
+    createPlaylistModal.addEventListener("click", async function (e) {
+        e.preventDefault();
+        const user = localStorage.getItem("user");
+        if (user) {
+            playlistDropdown.style.top = this.offsetHeight + "px";
+            playlistDropdown.style.left = this.offsetLeft + "px";
+            playlistDropdown.classList.toggle("show");
+        } else {
+            showLoginForm();
+            openModal();
+            iziToast.error({
+                title: "Error",
+                message: "Vui lòng đăng nhập để tạo playlist!",
+                position: "topCenter",
+            });
+        }
+    });
+    playlistDropdown.addEventListener("click", async function (e) {
+        e.preventDefault();
+        const createPlaylist = e.target.closest("#createPlaylist");
+        if (createPlaylist) {
+            // const user = JSON.parse(localStorage.getItem("user"));
+            // const data = {
+            //     name: "Playlist",
+            //     description: `Danh sách đang phát. ${user.display_name}`,
+            //     is_public: true,
+            //     image_url: "https://example.com/playlist-cover.jpg",
+            // };
+            // const res = await httpRequest.post("playlists", data);
+            // const playlist = res.playlist;
+            // const playlistItem = document.createElement("div");
+            // playlistItem.innerHTML = `<div class="library-item active" data-id="${EscapeHtml(
+            //     playlist.id
+            // )}">
+            //   <img
+            //     src="${
+            //         EscapeHtml(playlist.image_url) || "placeholder.svg"
+            //     }?height=48&width=48"
+            //     alt="${EscapeHtml(playlist.name || playlist.title)}"
+            //     class="item-image" onerror=" this.onerror=null ;this.src='placeholder.svg';"
+            //   />
+            //   <div class="item-info">
+            //     <div class="item-title">${EscapeHtml(
+            //         playlist.name || playlist.title
+            //     )}</div>
+            //     <div class="item-subtitle">${
+            //         playlist.description || playlist.subtitle
+            //     }</div>
+            //   </div>
+            // </div>`;
+            // libraryContent.prepend(playlistItem);
+            // playlistDropdown.classList.remove("show");
+            // await getMyPlayLists();
+            toggleMainContent(false, false, true, true, true, false);
+        }
+    });
+    // Load lại danh sách playlist của mình
+    navPlaylistBtn.addEventListener("click", function () {
+        const playlists = JSON.parse(localStorage.getItem("myPlaylists"));
+        myPlaylist([playlists], "playlist");
+    });
+    // load lại danh sách artist đã follow, chua co API de lam
+    navArtistsBtn.addEventListener("click", async function () {
+        await myArtistFollows();
+    });
+    //xử lý click vào libraryContent để mở ra 1 bộ sưu tập
+    libraryContent.addEventListener("click", async function (e) {
+        e.preventDefault;
+        const libraryItemOld = libraryContent.querySelector(
+            ".library-item.active"
+        );
+        const dropdownSearchLibrary =
+            libraryItemOld?.classList.remove(`active`);
+        const libraryItem = e.target.closest(".library-item");
+
+        if (libraryItem) {
+            const id = libraryItem.dataset.id;
+            const playlistHeader = document.querySelector(".playlist-header");
+            try {
+                const playlist = await httpRequest.get(`playlists/${id}`);
+                const tracks = await httpRequest.get(`playlists/${id}/tracks`);
+                console.log(tracks.tracks);
+                musicPlayer.songList = tracks.tracks;
+                musicPlayer.initialize();
+
+                if (tracks.tracks.length > 0) {
+                    trackList.innerHTML = "";
+                    let html = "";
+                    //thêm <i class="fas fa-volume-up playing-icon"></i>  vào tracks-number sẽ có cá loa
+                    tracks.tracks.forEach((track) => {
+                        html += `<div class="track-item">
                                 <div class="track-number">
                                                                                                            
                                 </div>
@@ -255,23 +301,23 @@ document.addEventListener("DOMContentLoaded", async function () {
                                     <i class="fas fa-ellipsis-h"></i>
                                 </button>
                             </div>`;
-          });
-          trackList.innerHTML = html;
-          toggleMainContent(1);
-        } else {
-          hitsSection.classList.remove("show");
-          artistsSection.classList.remove("show");
-          artistHero.classList.remove("show");
-          artistControls.classList.remove("show");
-          popularSection.classList.remove("show");
-          playlistSection.classList.add("show");
-          playlistHeader.classList.add("show");
-        }
-        playlistSection.innerHTML = `
+                    });
+                    trackList.innerHTML = html;
+                    toggleMainContent(1);
+                } else {
+                    hitsSection.classList.remove("show");
+                    artistsSection.classList.remove("show");
+                    artistHero.classList.remove("show");
+                    artistControls.classList.remove("show");
+                    popularSection.classList.remove("show");
+                    playlistSection.classList.add("show");
+                    playlistHeader.classList.add("show");
+                }
+                playlistSection.innerHTML = `
                     <div class="playlist-header">
                         <i class="playlist-icon"></i>
                         <span class="playlist-title">${EscapeHtml(
-                          playlist.name
+                            playlist.name
                         )}</span>
                     </div>
                     <hr class="playlist-divider" />
@@ -291,253 +337,277 @@ document.addEventListener("DOMContentLoaded", async function () {
                         </button>
                     </div>
                 `;
-      } catch (error) {}
+            } catch (error) {}
 
-      libraryItem.classList.add(`active`);
-    }
-  });
-  contentWrapper.addEventListener("click", async function (e) {
-    const closePlaylist = e.target.closest(".playlist-close");
-    const addTracksBtn = e.target.closest(".add-tracks-btn");
-    if (closePlaylist) {
-      playlistSection.classList.toggle("show");
-    }
-    if (addTracksBtn) {
-      playlistSection.classList.toggle("show");
-    }
-  });
-  searchLibraryBtn.addEventListener("click", () => {
-    searchLibrary.value = "";
-    searchLibrary.focus();
-    dropdownSearchLibrary.classList.toggle("open");
-  });
-  let timeDelay;
-  searchLibrary.addEventListener("input", (e) => {
-    clearTimeout(timeDelay);
-    timeDelay = setTimeout(async () => {
-      const para = searchLibrary.value;
-      if (para) {
-        const path = `search?q=${para}&type=all&limit=20&offset=0`;
-        const result = await search(path);
-        const arr = [
-          result.albums,
-          result.tracks,
-          result.artists,
-          result.playlists,
-        ];
-        myPlaylist(arr);
+            libraryItem.classList.add(`active`);
+        }
+    });
+    contentWrapper.addEventListener("click", async function (e) {
+        const closePlaylist = e.target.closest(".playlist-close");
+        const addTracksBtn = e.target.closest(".add-tracks-btn");
+        if (closePlaylist) {
+            playlistSection.classList.toggle("show");
+        }
+        if (addTracksBtn) {
+            playlistSection.classList.toggle("show");
+        }
+    });
+    searchLibraryBtn.addEventListener("click", () => {
+        searchLibrary.value = "";
+        searchLibrary.focus();
+        dropdownSearchLibrary.classList.toggle("open");
+    });
+    let timeDelay;
+    searchLibrary.addEventListener("input", (e) => {
+        clearTimeout(timeDelay);
+        timeDelay = setTimeout(async () => {
+            const para = searchLibrary.value;
+            if (para) {
+                const path = `search?q=${para}&type=all&limit=20&offset=0`;
+                const result = await search(path);
+                const arr = [
+                    result.albums,
+                    result.tracks,
+                    result.artists,
+                    result.playlists,
+                ];
+                myPlaylist(arr);
 
-        console.log(arr);
-      } else {
-        const playlists = JSON.parse(localStorage.getItem("myPlaylists"));
-        myPlaylist([playlists]);
-      }
-    }, 1000);
-  });
+                console.log(arr);
+            } else {
+                const playlists = JSON.parse(
+                    localStorage.getItem("myPlaylists")
+                );
+                myPlaylist([playlists]);
+            }
+        }, 1000);
+    });
+    searchInput.addEventListener("input", () => {
+        clearTimeout(timeDelay);
+        timeDelay = setTimeout(async () => {
+            const value = searchInput.value;
+            const path = `search?q=${para}&type=all&limit=20&offset=0`;
+            const result = await search(path);
+            const arr = [
+                result.albums,
+                result.tracks,
+                result.artists,
+                result.playlists,
+            ];
+        });
+    });
 });
 
 // User Menu Dropdown Functionality
 document.addEventListener("DOMContentLoaded", function () {
-  const userAvatar = document.getElementById("userAvatar");
-  const userDropdown = document.getElementById("userDropdown");
-  const logoutBtn = document.getElementById("logoutBtn");
+    const userAvatar = document.getElementById("userAvatar");
+    const userDropdown = document.getElementById("userDropdown");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-  // Toggle dropdown when clicking avatar
-  userAvatar.addEventListener("click", function (e) {
-    e.stopPropagation();
-    userDropdown.classList.toggle("show");
-  });
+    // Toggle dropdown when clicking avatar
+    userAvatar.addEventListener("click", function (e) {
+        e.stopPropagation();
+        userDropdown.classList.toggle("show");
+    });
 
-  // Close dropdown when clicking outside
-  document.addEventListener("click", function (e) {
-    if (!userAvatar.contains(e.target) && !userDropdown.contains(e.target)) {
-      userDropdown.classList.remove("show");
-    }
-  });
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function (e) {
+        if (
+            !userAvatar.contains(e.target) &&
+            !userDropdown.contains(e.target)
+        ) {
+            userDropdown.classList.remove("show");
+        }
+    });
 
-  // Close dropdown when pressing Escape
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && userDropdown.classList.contains("show")) {
-      userDropdown.classList.remove("show");
-    }
-  });
+    // Close dropdown when pressing Escape
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && userDropdown.classList.contains("show")) {
+            userDropdown.classList.remove("show");
+        }
+    });
 
-  // Handle logout button click
-  logoutBtn.addEventListener("click", async function () {
-    // Close dropdown first
-    await httpRequest.post("auth/logout");
-    userDropdown.classList.remove("show");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    localStorage.removeItem("myPlaylists");
-    localStorage.removeItem("artistsFollows");
-    renderUserInfo();
-    await httpRequest.post("auth/logout");
-    // TODO: Students will implement logout logic here
-  });
+    // Handle logout button click
+    logoutBtn.addEventListener("click", async function () {
+        // Close dropdown first
+        await httpRequest.post("auth/logout");
+        userDropdown.classList.remove("show");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("myPlaylists");
+        localStorage.removeItem("artistFollows");
+        renderUserInfo();
+        myPlaylist();
+        await httpRequest.post("auth/logout");
+        // TODO: Students will implement logout logic here
+    });
 });
 
 // Other functionality
 document.addEventListener("DOMContentLoaded", async function () {
-  // TODO: Implement other functionality here
-  toggleMainContent(true, true);
-  await tracksTrending();
-  await artistsTrending();
-  await renderUserInfo();
-  const myPlaylists = JSON.parse(localStorage.getItem("myPlaylists"));
-  if (myPlaylists) {
-    myPlaylist([myPlaylists]);
-  }
+    // TODO: Implement other functionality here
+    toggleMainContent(true, true);
+    await tracksTrending();
+    await artistsTrending();
+    await renderUserInfo();
+    const myPlaylists = JSON.parse(localStorage.getItem("myPlaylists"));
+    if (myPlaylists) {
+        myPlaylist([myPlaylists], "playlist");
+    }
 });
 async function search(path) {
-  try {
-    const { results } = await httpRequest.get(path);
-    console.log(results);
-    return results;
-  } catch (error) {}
+    try {
+        const { results } = await httpRequest.get(path);
+        console.log(results);
+        return results;
+    } catch (error) {}
 }
 function toggleMainContent(
-  hitsSectionShow,
-  artistsSectionShow,
-  artistHeroShow,
-  artistControlsShow,
-  popularSectionShow,
-  playlistSectionShow
+    hitsSectionShow,
+    artistsSectionShow,
+    artistHeroShow,
+    artistControlsShow,
+    popularSectionShow,
+    playlistSectionShow
 ) {
-  const artistHero = document.querySelector(".artist-hero");
-  const artistControls = document.querySelector(".artist-controls");
-  const popularSection = document.querySelector(".popular-section");
-  const hitsSection = document.querySelector(".hits-section");
-  const artistsSection = document.querySelector(".artists-section");
-  const playlistSection = document.querySelector(".playlist-section");
-  artistHeroShow
-    ? artistHero.classList.add("show")
-    : artistHero.classList.remove("show");
-  artistControlsShow
-    ? artistControls.classList.add("show")
-    : artistControls.classList.remove("show");
-  popularSectionShow
-    ? popularSection.classList.add("show")
-    : popularSection.classList.remove("show");
-  hitsSectionShow
-    ? hitsSection.classList.add("show")
-    : hitsSection.classList.remove("show");
-  artistsSectionShow
-    ? artistsSection.classList.add("show")
-    : artistsSection.classList.remove("show");
-  playlistSectionShow
-    ? playlistSection.classList.add("show")
-    : playlistSection.classList.remove("show");
+    const artistHero = document.querySelector(".artist-hero");
+    const artistControls = document.querySelector(".artist-controls");
+    const popularSection = document.querySelector(".popular-section");
+    const hitsSection = document.querySelector(".hits-section");
+    const artistsSection = document.querySelector(".artists-section");
+    const playlistSection = document.querySelector(".playlist-section");
+    artistHeroShow
+        ? artistHero.classList.add("show")
+        : artistHero.classList.remove("show");
+    artistControlsShow
+        ? artistControls.classList.add("show")
+        : artistControls.classList.remove("show");
+    popularSectionShow
+        ? popularSection.classList.add("show")
+        : popularSection.classList.remove("show");
+    hitsSectionShow
+        ? hitsSection.classList.add("show")
+        : hitsSection.classList.remove("show");
+    artistsSectionShow
+        ? artistsSection.classList.add("show")
+        : artistsSection.classList.remove("show");
+    playlistSectionShow
+        ? playlistSection.classList.add("show")
+        : playlistSection.classList.remove("show");
 }
 async function addTracksToPlaylists() {}
 
 async function renderUserInfo() {
-  const authButtons = document.querySelector(".auth-buttons");
-  const userMenu = document.querySelector(".user-menu");
-  const userAvatar = document.querySelector(".user-avatar-img");
-  try {
-    const { user } = await httpRequest.get("users/me");
-    localStorage.setItem("user", JSON.stringify(user));
-    authButtons.classList.remove("show");
-    userMenu.classList.add("show");
-    userAvatar.src = `${user.avatar_url || "placeholder.png"}`;
-    tippy("#userAvatar", {
-      content: `${user.display_name || user.username}`,
-    });
-  } catch (error) {
-    authButtons.classList.add("show");
-    userMenu.classList.remove("show");
-  }
+    const authButtons = document.querySelector(".auth-buttons");
+    const userMenu = document.querySelector(".user-menu");
+    const userAvatar = document.querySelector(".user-avatar-img");
+    try {
+        const { user } = await httpRequest.get("users/me");
+        localStorage.setItem("user", JSON.stringify(user));
+        authButtons.classList.remove("show");
+        userMenu.classList.add("show");
+        userAvatar.src = `${user.avatar_url || "placeholder.svg"}`;
+        tippy("#userAvatar", {
+            content: `${user.display_name || user.username}`,
+        });
+    } catch (error) {
+        authButtons.classList.add("show");
+        userMenu.classList.remove("show");
+    }
 }
 async function getMyPlayLists() {
-  try {
-    const { playlists } = await httpRequest.get("me/playlists");
-    localStorage.setItem("myPlaylists", JSON.stringify(playlists));
-  } catch (error) {}
+    try {
+        const { playlists } = await httpRequest.get("me/playlists");
+        localStorage.setItem("myPlaylists", JSON.stringify(playlists));
+        return playlists;
+    } catch (error) {}
 }
-function myPlaylist(list) {
-  const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
-  const navArtistsBtn = document.querySelector(".nav-artists-btn");
-  const libraryContent = document.querySelector(".library-content");
-  libraryContent.innerHTML = `<div class="library-content"></div>`;
-  if (list) {
-    navPlaylistBtn.classList.add("active");
-    navArtistsBtn.classList.remove("active");
-    list.forEach((playlists) => {
-      playlists.forEach((playlist) => {
-        const playlistItem = document.createElement("div");
-        playlistItem.innerHTML = `<div class="library-item" data-id="${EscapeHtml(
-          playlist.id
-        )}">
+function myPlaylist(list, type) {
+    const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
+    const navArtistsBtn = document.querySelector(".nav-artists-btn");
+    const libraryContent = document.querySelector(".library-content");
+    libraryContent.innerHTML = ``;
+    if (list) {
+        navPlaylistBtn.classList.add("active");
+        navArtistsBtn.classList.remove("active");
+        list.forEach((playlists) => {
+            playlists.forEach((playlist) => {
+                const playlistItem = document.createElement("div");
+                playlistItem.innerHTML = `<div class="library-item" data-type="${EscapeHtml(
+                    type || playlist.type
+                )}" data-id="${EscapeHtml(playlist.id)}">
               <img
                 src="${
-                  EscapeHtml(playlist.image_url) || "placeholder.png"
+                    EscapeHtml(playlist.image_url) || "placeholder.svg"
                 }?height=48&width=48"
-                alt="${playlist.name}"
-                class="item-image" onerror=" this.onerror=null ;this.src='../placeholder.png';"
+                alt="${EscapeHtml(playlist.name || playlist.title)}"
+                class="item-image" onerror=" this.onerror=null ;this.src='placeholder.svg';"
               />
               <div class="item-info">
-                <div class="item-title">${playlist.name}</div>
-                <div class="item-subtitle">${playlist.description}</div>
+                <div class="item-title">${EscapeHtml(
+                    playlist.name || playlist.title
+                )}</div>
+                <div class="item-subtitle">${
+                    playlist.description || playlist.subtitle
+                }</div>
               </div>
             </div>`;
-        libraryContent.appendChild(playlistItem);
-      });
-    });
-  }
+                libraryContent.appendChild(playlistItem);
+            });
+        });
+    }
 }
 
 async function getArtistFollows() {
-  try {
-    // chưa có API nên  lấy all artistsFollow
-    const { artists } = await httpRequest.get("artists?limit=20&offset=0");
-    return artists;
-  } catch (error) {}
+    try {
+        // chưa có API nên  lấy all artistsFollow
+        const { artists } = await httpRequest.get("artists?limit=20&offset=0");
+        return artists;
+    } catch (error) {}
 }
 async function myArtistFollows() {
-  const artistFollows = await getArtistFollows();
-  console.log(artistFollows);
-  const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
-  const navArtistsBtn = document.querySelector(".nav-artists-btn");
-  const libraryContent = document.querySelector(".library-content");
-  libraryContent.innerHTML = `<div class="library-content"></div>`;
-  if (artistFollows) {
-    navPlaylistBtn.classList.remove("active");
-    navArtistsBtn.classList.add("active");
-    artistFollows.forEach((artist) => {
-      const artistItem = document.createElement("div");
-      artistItem.innerHTML = `<div class="library-item" data-id="${EscapeHtml(
-        artist.id
-      )}">
+    const artistFollows = await getArtistFollows();
+    const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
+    const navArtistsBtn = document.querySelector(".nav-artists-btn");
+    const libraryContent = document.querySelector(".library-content");
+    libraryContent.innerHTML = ``;
+    if (artistFollows) {
+        navPlaylistBtn.classList.remove("active");
+        navArtistsBtn.classList.add("active");
+        artistFollows.forEach((artist) => {
+            const artistItem = document.createElement("div");
+            artistItem.innerHTML = `<div class="library-item" data-type="artist" data-id="${EscapeHtml(
+                artist.id
+            )}">
               <img
                 src="${
-                  EscapeHtml(artist.image_url) || "placeholder.png"
+                    EscapeHtml(artist.image_url) || "placeholder.svg"
                 }?height=48&width=48"
                 alt="${artist.name}"
-                class="item-image" onerror=" this.onerror=null ;this.src='../placeholder.png';"
+                class="item-image" onerror=" this.onerror=null ;this.src='placeholder.svg';"
               />
               <div class="item-info">
                 <div class="item-title">${artist.name}</div>
-                <div class="item-subtitle">${artist.description}</div>
+                <div class="item-subtitle">${artist.bio}</div>
               </div>
             </div>`;
-      libraryContent.appendChild(artistItem);
-    });
-  }
+            libraryContent.appendChild(artistItem);
+        });
+    }
 }
 async function artistsTrending() {
-  const res = await httpRequest.get("artists/trending?limit=20");
-  const artistsGrid = document.querySelector(".artists-grid");
-  let popularArtists = "";
-  if (res) {
-    res.artists.forEach((artist) => {
-      const artistItem = `<div class="artist-card" data-id="${EscapeHtml(
-        artist.id
-      )}">
+    const res = await httpRequest.get("artists/trending?limit=20");
+    const artistsGrid = document.querySelector(".artists-grid");
+    let popularArtists = "";
+    if (res) {
+        res.artists.forEach((artist) => {
+            const artistItem = `<div class="artist-card" data-type="artist" data-id="${EscapeHtml(
+                artist.id
+            )}">
                                 <div class="artist-card-cover">
                                     <img
                                         src="${EscapeHtml(
-                                          artist.image_url
+                                            artist.image_url
                                         )}?height=160&width=160"
                                         alt="Đen" onerror="this.onerror=null;this.src='placeholder.svg';"
                                     />
@@ -547,33 +617,33 @@ async function artistsTrending() {
                                 </div>
                                 <div class="artist-card-info">
                                     <h3 class="artist-card-name">${EscapeHtml(
-                                      artist.name
+                                        artist.name
                                     )}</h3>
                                     <p class="artist-card-type">Ca sĩ</p>
                                 </div>
                             </div>`;
-      popularArtists += artistItem;
-    });
-  }
-  artistsGrid.innerHTML = popularArtists;
+            popularArtists += artistItem;
+        });
+    }
+    artistsGrid.innerHTML = popularArtists;
 }
 async function tracksTrending() {
-  const res = await httpRequest.get("tracks/trending?limit=20");
-  const tracksGrid = document.querySelector(".hits-grid");
-  let popularTracks = "";
-  if (res) {
-    res.tracks.forEach((track) => {
-      const trackItem = `<div class="hit-card" data-id="${EscapeHtml(
-        track.id
-      )}">
+    const res = await httpRequest.get("tracks/trending?limit=20");
+    const tracksGrid = document.querySelector(".hits-grid");
+    let popularTracks = "";
+    if (res) {
+        res.tracks.forEach((track) => {
+            const trackItem = `<div class="hit-card" data-type="track" data-id="${EscapeHtml(
+                track.id
+            )}">
                                 <div class="hit-card-cover">
                                     <img
                                         src="${EscapeHtml(
-                                          track.artist_image_url
+                                            track.artist_image_url
                                         )}"
                                         alt="${EscapeHtml(track.title)}"
                                         onerror=" this.onerror=null ;this.src='${EscapeHtml(
-                                          track.artist_image_url
+                                            track.artist_image_url
                                         )}';"
                                     />
                                     <button class="hit-play-btn">
@@ -582,20 +652,20 @@ async function tracksTrending() {
                                 </div>
                                 <div class="hit-card-info">
                                     <h3 class="hit-card-title">${EscapeHtml(
-                                      track.title
+                                        track.title
                                     )}</h3>
                                     <p class="hit-card-artist">${EscapeHtml(
-                                      track.artist_name
+                                        track.artist_name
                                     )}</p>
                                 </div>
                             </div>`;
-      popularTracks += trackItem;
-    });
-  }
-  tracksGrid.innerHTML = popularTracks;
+            popularTracks += trackItem;
+        });
+    }
+    tracksGrid.innerHTML = popularTracks;
 }
 function EscapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
 }

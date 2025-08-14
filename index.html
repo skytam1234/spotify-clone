@@ -185,8 +185,22 @@
                         <div class="section-header">
                             <h2 class="section-heading">Popular artists</h2>
                         </div>
-
                         <div class="artists-grid"></div>
+                    </section>
+
+                    <!-- Album -->
+                    <!-- <section class="album-section">
+                        <div class="section-header">
+                            <h2 class="section-heading">Popular artists</h2>
+                        </div>
+                        <div class="album-grid"></div>
+                    </section> -->
+                    <!-- Playlist -->
+                    <!-- <section class="content-playlist-section"> -->
+                        <div class="section-header">
+                            <h2 class="section-heading">Popular artists</h2>
+                        </div>
+                        <div class="content-playlist-grid"></div>
                     </section>
 
                     <!-- Artist Hero Section -->
@@ -214,7 +228,7 @@
                     <!-- Artist Controls -->
                     <section class="artist-controls">
                         <button class="play-btn-large">
-                            <i class="fas fa-play"></i>
+                            <i class="fas fa-play play-icon-large-btn"></i>
                         </button>
                     </section>
 
@@ -300,23 +314,23 @@
 
                 <div class="player-center">
                     <div class="player-controls">
-                        <button class="control-btn active">
+                        <button class="control-btn btn-loop active">
                             <i class="fas fa-random"></i>
                         </button>
-                        <button class="control-btn">
+                        <button class="control-btn btn-prev">
                             <i class="fas fa-step-backward"></i>
                         </button>
                         <button class="control-btn play-btn">
-                            <i class="fas fa-pause"></i>
+                            <i class="fas fa-pause play-icon"></i>
                         </button>
-                        <button class="control-btn">
+                        <button class="control-btn btn-next">
                             <i class="fas fa-step-forward"></i>
                         </button>
-                        <button class="control-btn">
+                        <button class="control-btn btn-shuffle">
                             <i class="fas fa-redo"></i>
                         </button>
                     </div>
-                    <div class="progress-container">
+                    <div class="progress-container progress-bar">
                         <span class="time">0:52</span>
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 20%"></div>
@@ -344,6 +358,8 @@
                     </button>
                 </div>
             </footer>
+            <!-- audio -->
+             <audio src=""class="audio-player"></audio>
         </div>
 
         <!-- Auth Modal -->
@@ -468,5 +484,6 @@
         <script src="https://unpkg.com/tippy.js@5"></script>
         <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
         <script src="main.js" type="module"></script>
+        <script src="player.js" type="module"></script>
     </body>
 </html>
