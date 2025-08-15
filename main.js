@@ -609,7 +609,6 @@ function toggleMainContent(
         ? playlistSection.classList.add("show")
         : playlistSection.classList.remove("show");
 }
-
 async function renderUserInfo() {
     const authButtons = document.querySelector(".auth-buttons");
     const userMenu = document.querySelector(".user-menu");
@@ -778,9 +777,7 @@ async function tracksTrending() {
             )}">
                                 <div class="hit-card-cover">
                                     <img
-                                        src="${EscapeHtml(
-                                            track.artist_image_url
-                                        )}"
+                                        src="${EscapeHtml(track.image_url)}"
                                         alt="${EscapeHtml(track.title)}"
                                         onerror=" this.onerror=null ;this.src='${EscapeHtml(
                                             track.artist_image_url
