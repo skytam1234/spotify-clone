@@ -197,17 +197,17 @@
                     </section> -->
                     <!-- Playlist -->
                     <!-- <section class="content-playlist-section"> -->
-                        <div class="section-header">
+                    <!-- <div class="section-header">
                             <h2 class="section-heading">Popular artists</h2>
                         </div>
                         <div class="content-playlist-grid"></div>
-                    </section>
+                    </section> -->
 
                     <!-- Artist Hero Section -->
                     <section class="artist-hero">
                         <div class="hero-background">
                             <img
-                                src="placeholder.svg"
+                                src="https://i.pinimg.com/736x/cd/f5/1a/cdf51aaa3c71d3482217d44fc0a09c57.jpg"
                                 alt="Đen artist background"
                                 class="hero-image"
                             />
@@ -215,11 +215,11 @@
                         </div>
                         <div class="hero-content">
                             <div class="verified-badge">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Verified Artist</span>
+                                <!-- <i class="fas fa-check-circle"></i>
+                                <span>Verified Artist</span> -->
                             </div>
-                            <h1 class="artist-name">Đen</h1>
-                            <p class="monthly-listeners">
+                            <h1 class="artist-name artist-hero-title">Đen</h1>
+                            <p class="monthly-listeners artist-hero-subtitle">
                                 1,021,833 monthly listeners
                             </p>
                         </div>
@@ -234,7 +234,7 @@
 
                     <!-- Popular Tracks -->
                     <section class="popular-section">
-                        <h2 class="section-title">Popular</h2>
+                        <h2 class="section-title">Danh sách bài hát của tôi</h2>
                         <div class="track-list">
                             <!-- <div class="track-item playing">
                                 <div class="track-number">
@@ -266,12 +266,6 @@
                     </section>
                     <section class="playlist-section">
                         <div class="create-playlist-modal">
-                            <div class="playlist-header">
-                                <i class="playlist-icon"></i>
-                                <span class="playlist-title"
-                                    >Danh sách phát của tôi #4</span
-                                >
-                            </div>
                             <hr class="playlist-divider" />
                             <div class="playlist-content">
                                 <h2 class="playlist-heading">
@@ -282,12 +276,14 @@
                                     <input
                                         type="text"
                                         placeholder="Tìm bài hát và tập podcast"
+                                        id="playlist-search__input"
                                     />
                                 </div>
                                 <button class="playlist-close">
                                     <span>&times;</span>
                                 </button>
                             </div>
+                            <div class="dropdown-playlist-content"></div>
                         </div>
                     </section>
                 </div>
@@ -359,7 +355,7 @@
                 </div>
             </footer>
             <!-- audio -->
-             <audio src=""class="audio-player"></audio>
+            <audio src="" class="audio-player"></audio>
         </div>
 
         <!-- Auth Modal -->

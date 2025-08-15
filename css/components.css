@@ -543,6 +543,12 @@
     transition: all var(--transition-fast);
     opacity: 0;
 }
+#add-track-to-list {
+    border-radius: 19px;
+    padding: 0 25px;
+    border: solid 1px var(--text-secondary);
+    opacity: 1;
+}
 
 .track-item:hover .track-menu-btn {
     opacity: 1;

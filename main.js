@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const dropdownSearchLibrary = document.querySelector(
         ".dropdown-search-library"
     );
-    const searchInput = document.querySelector(".search-input");
+    //const searchInput = document.querySelector(".search-input");
 
     const artistHero = document.querySelector(".artist-hero");
     const artistControls = document.querySelector(".artist-controls");
@@ -41,7 +41,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     const hitsSection = document.querySelector(".hits-section");
     const artistsSection = document.querySelector(".artists-section");
     const playlistSection = document.querySelector(".playlist-section");
-    const playlistHeader = document.querySelector(".playlist-header");
+    const playlistSearchInput = document.querySelector(
+        "#playlist-search__input"
+    );
+    const dropdownPlaylistContent = document.querySelector(
+        ".dropdown-playlist-content"
+    );
 
     const trackList = document.querySelector(".track-list");
 
@@ -97,6 +102,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Close modal with Escape key
     document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && authModal.classList.contains("show")) {
+            closeModal();
+        }
         if (e.key === "Escape" && authModal.classList.contains("show")) {
             closeModal();
         }
@@ -186,7 +194,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
         if (isSuccess) {
             const playlist = await getMyPlayLists();
-            myPlaylist([playlist]);
+            await myPlaylist([playlist]);
         }
     });
 
@@ -211,45 +219,46 @@ document.addEventListener("DOMContentLoaded", async function () {
         e.preventDefault();
         const createPlaylist = e.target.closest("#createPlaylist");
         if (createPlaylist) {
-            // const user = JSON.parse(localStorage.getItem("user"));
-            // const data = {
-            //     name: "Playlist",
-            //     description: `Danh sách đang phát. ${user.display_name}`,
-            //     is_public: true,
-            //     image_url: "https://example.com/playlist-cover.jpg",
-            // };
-            // const res = await httpRequest.post("playlists", data);
-            // const playlist = res.playlist;
-            // const playlistItem = document.createElement("div");
-            // playlistItem.innerHTML = `<div class="library-item active" data-id="${EscapeHtml(
-            //     playlist.id
-            // )}">
-            //   <img
-            //     src="${
-            //         EscapeHtml(playlist.image_url) || "placeholder.svg"
-            //     }?height=48&width=48"
-            //     alt="${EscapeHtml(playlist.name || playlist.title)}"
-            //     class="item-image" onerror=" this.onerror=null ;this.src='placeholder.svg';"
-            //   />
-            //   <div class="item-info">
-            //     <div class="item-title">${EscapeHtml(
-            //         playlist.name || playlist.title
-            //     )}</div>
-            //     <div class="item-subtitle">${
-            //         playlist.description || playlist.subtitle
-            //     }</div>
-            //   </div>
-            // </div>`;
-            // libraryContent.prepend(playlistItem);
-            // playlistDropdown.classList.remove("show");
-            // await getMyPlayLists();
+            const user = JSON.parse(localStorage.getItem("user"));
+            const data = {
+                name: "Dương Đức Tâm",
+                description: `Danh sách đang phát. ${user.display_name}`,
+                is_public: true,
+                image_url: "https://example.com/playlist-cover.jpg",
+            };
+            const res = await httpRequest.post("playlists", data);
+            const playlist = res.playlist;
+            const playlistItem = document.createElement("div");
+            playlistItem.innerHTML = `<div class="library-item active" data-id="${EscapeHtml(
+                playlist.id
+            )}">
+              <img
+                src="${
+                    EscapeHtml(playlist.image_url) || "placeholder.svg"
+                }?height=48&width=48"
+                alt="${EscapeHtml(playlist.name || playlist.title)}"
+                class="item-image" onerror=" this.onerror=null ;this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9C76COoU19vxN_sXxYEFBhFbJlfN42zstWg&s';"
+              />
+              <div class="item-info">
+                <div class="item-title">${EscapeHtml(
+                    playlist.name || playlist.title
+                )}</div>
+                <div class="item-subtitle">${
+                    playlist.description || playlist.subtitle
+                }</div>
+              </div>
+            </div>`;
+            const likeItem = libraryContent.children[1];
+            libraryContent.insertBefore(playlistItem, likeItem);
+            playlistDropdown.classList.remove("show");
+            await getMyPlayLists();
             toggleMainContent(false, false, true, true, true, false);
         }
     });
     // Load lại danh sách playlist của mình
-    navPlaylistBtn.addEventListener("click", function () {
+    navPlaylistBtn.addEventListener("click", async function () {
         const playlists = JSON.parse(localStorage.getItem("myPlaylists"));
-        myPlaylist([playlists], "playlist");
+        await myPlaylist([playlists], "playlist");
     });
     // load lại danh sách artist đã follow, chua co API de lam
     navArtistsBtn.addEventListener("click", async function () {
@@ -264,17 +273,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         const dropdownSearchLibrary =
             libraryItemOld?.classList.remove(`active`);
         const libraryItem = e.target.closest(".library-item");
+        trackList.innerHTML = "";
+        dropdownPlaylistContent.innerHTML = "";
+        playlistSearchInput.value = "";
 
         if (libraryItem) {
             const id = libraryItem.dataset.id;
+            localStorage.setItem("currentPlaylist", JSON.stringify(id));
             const playlistHeader = document.querySelector(".playlist-header");
             try {
                 const playlist = await httpRequest.get(`playlists/${id}`);
                 const tracks = await httpRequest.get(`playlists/${id}/tracks`);
-                console.log(tracks.tracks);
-                musicPlayer.songList = tracks.tracks;
-                musicPlayer.initialize();
-
                 if (tracks.tracks.length > 0) {
                     trackList.innerHTML = "";
                     let html = "";
@@ -286,57 +295,43 @@ document.addEventListener("DOMContentLoaded", async function () {
                                 </div>
                                 <div class="track-image">
                                     <img
-                                        src="placeholder.svg?height=40&width=40"
+                                        src="http://spotify.f8team.dev/${
+                                            track.track_image_url
+                                        }?height=40&width=40"
                                         alt="Lối Nhỏ"
                                     />
                                 </div>
                                 <div class="track-info">
                                     <div class="track-name playing-text">
-                                        Lối Nhỏ
+                                        ${track.track_title}
                                     </div>
                                 </div>
-                                <div class="track-plays">45,686,866</div>
-                                <div class="track-duration">4:12</div>
+                                <div class="track-plays">${
+                                    track.track_play_count
+                                }</div>
+                                <div class="track-duration">${
+                                    (track.track_duration -
+                                        (track.track_duration % 60)) /
+                                    60
+                                }:${track.track_duration % 60}</div>
                                 <button class="track-menu-btn">
                                     <i class="fas fa-ellipsis-h"></i>
                                 </button>
                             </div>`;
                     });
                     trackList.innerHTML = html;
-                    toggleMainContent(1);
+                    toggleMainContent(false, false, true, true, true, false);
                 } else {
-                    hitsSection.classList.remove("show");
-                    artistsSection.classList.remove("show");
-                    artistHero.classList.remove("show");
-                    artistControls.classList.remove("show");
-                    popularSection.classList.remove("show");
-                    playlistSection.classList.add("show");
-                    playlistHeader.classList.add("show");
+                    const artistHeroTitle =
+                        document.querySelector(".artist-hero-title");
+                    const artistHeroSubtitle = document.querySelector(
+                        ".artist-hero-subtitle"
+                    );
+
+                    artistHeroTitle.textContent = playlist.name;
+                    artistHeroSubtitle.textContent = playlist.description;
+                    toggleMainContent(false, false, true, false, true, true);
                 }
-                playlistSection.innerHTML = `
-                    <div class="playlist-header">
-                        <i class="playlist-icon"></i>
-                        <span class="playlist-title">${EscapeHtml(
-                            playlist.name
-                        )}</span>
-                    </div>
-                    <hr class="playlist-divider" />
-                    <div class="playlist-content">
-                        <h2 class="playlist-heading">
-                            Danh sách bài hát
-                        </h2>
-                        <div class="playlist-search">
-                            <input
-                                type="text"
-                                placeholder="Tìm bài hát"
-                                class="myPlaylist-search"
-                            />
-                        </div>
-                        <button class="playlist-close">
-                            <span>&times;</span>
-                        </button>
-                    </div>
-                `;
             } catch (error) {}
 
             libraryItem.classList.add(`active`);
@@ -350,6 +345,68 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
         if (addTracksBtn) {
             playlistSection.classList.toggle("show");
+        }
+    });
+    playlistSection.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const addTrackToList = e.target.closest("#add-track-to-list");
+        const trackItem = e.target.closest(".track-item");
+
+        if (addTrackToList) {
+            try {
+                const id = trackItem.dataset.id;
+                const data = {
+                    track_id: id,
+                    position: "1",
+                };
+                console.log(data);
+                const playlistId = JSON.parse(
+                    localStorage.getItem("currentPlaylist")
+                );
+
+                const res = await httpRequest.post(
+                    `playlists/${playlistId}/tracks`,
+                    data
+                );
+
+                const track = await httpRequest.get(
+                    `tracks/${trackItem.dataset.id}`
+                );
+                const divElement = document.createElement("div");
+                divElement.innerHTML = `<div class="track-item">
+                                    <div class="track-number">
+                                    </div>
+                                    <div class="track-image">
+                                        <img
+                                            src="${
+                                                EscapeHtml(
+                                                    track.album_cover_image_url
+                                                ) || "placeholder.svg"
+                                            }?height=40&width=40"
+                                            alt="${EscapeHtml(trackItem.title)}"
+                                        />
+                                    </div>
+                                    <div class="track-info">
+                                        <div class="track-name playing-text">
+                                            ${track.title}
+                                        </div>
+                                    </div>
+                                    <div class="track-plays">${
+                                        track.play_count
+                                    }</div>
+                                    <div class="track-duration">${
+                                        (track.duration -
+                                            (track.duration % 60)) /
+                                        60
+                                    }:${track.duration % 60}</div>
+                                    <button class="track-menu-btn">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                </div>`;
+                trackList.appendChild(divElement);
+            } catch (error) {
+                throw error;
+            }
         }
     });
     searchLibraryBtn.addEventListener("click", () => {
@@ -371,31 +428,83 @@ document.addEventListener("DOMContentLoaded", async function () {
                     result.artists,
                     result.playlists,
                 ];
-                myPlaylist(arr);
+                await myPlaylist(arr);
 
                 console.log(arr);
             } else {
                 const playlists = JSON.parse(
                     localStorage.getItem("myPlaylists")
                 );
-                myPlaylist([playlists]);
+                await myPlaylist([playlists]);
             }
         }, 1000);
     });
-    searchInput.addEventListener("input", () => {
-        clearTimeout(timeDelay);
-        timeDelay = setTimeout(async () => {
-            const value = searchInput.value;
-            const path = `search?q=${para}&type=all&limit=20&offset=0`;
-            const result = await search(path);
-            const arr = [
-                result.albums,
-                result.tracks,
-                result.artists,
-                result.playlists,
-            ];
-        });
-    });
+
+    playlistSearchInput.addEventListener(
+        "input",
+        async () => {
+            clearTimeout(timeDelay);
+            timeDelay = setTimeout(async () => {
+                const value = playlistSearchInput.value;
+                if (value) {
+                    const path = `search?q=${value}&type=track&limit=10`;
+                    const result = await search(path);
+                    const tracks = result.tracks;
+
+                    dropdownPlaylistContent.innerHTML = "";
+                    let html = "";
+                    //thêm <i class="fas fa-volume-up playing-icon"></i>  vào tracks-number sẽ có cá loa
+                    if (tracks) {
+                        tracks.forEach((track, index) => {
+                            html += `<div class="track-item" data-id="${
+                                track.id
+                            }">
+                                <div class="track-number">
+                                        ${
+                                            index + 1
+                                        }                                                                   
+                                </div>
+                                <div class="track-image">
+                                    <img
+                                        src="${
+                                            EscapeHtml(track.image_url) ||
+                                            "placeholder.svg"
+                                        }?height=40&width=40"
+                                        alt="Lối Nhỏ"
+                                    />
+                                </div>
+                                <div class="track-info">
+                                    <div class="track-name playing-text">
+                                        ${EscapeHtml(track.title)}
+                                    </div>
+                                </div>
+                                <div class="track-info">
+                                    <div class="track-name playing-text">
+                                        ${EscapeHtml(track.subtitle)}
+                                    </div>
+                                </div>
+                                <div class="track-plays">${EscapeHtml(
+                                    track.track_play_count
+                                )}</div>
+                                <div class="track-duration">${EscapeHtml(
+                                    (track.additional_info.duration -
+                                        (track.additional_info.duration % 60)) /
+                                        60
+                                )}:${EscapeHtml(
+                                track.additional_info.duration % 60
+                            ).padStart(2, "0")}</div>
+                                <button class="track-menu-btn " id="add-track-to-list">
+                                    Thêm
+                                </button>
+                            </div>`;
+                        });
+                        dropdownPlaylistContent.innerHTML = html;
+                    }
+                }
+            });
+        },
+        600
+    );
 });
 
 // User Menu Dropdown Functionality
@@ -403,6 +512,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const userAvatar = document.getElementById("userAvatar");
     const userDropdown = document.getElementById("userDropdown");
     const logoutBtn = document.getElementById("logoutBtn");
+    const playlistDropdown = document.querySelector(".playlist-dropdown");
+    const createPlaylistModal = document.querySelector(".create-btn");
 
     // Toggle dropdown when clicking avatar
     userAvatar.addEventListener("click", function (e) {
@@ -412,11 +523,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Close dropdown when clicking outside
     document.addEventListener("click", function (e) {
+        e.preventDefault();
         if (
             !userAvatar.contains(e.target) &&
             !userDropdown.contains(e.target)
         ) {
             userDropdown.classList.remove("show");
+        }
+        if (!playlistDropdown.contains(e.target) && !createPlaylistModal) {
+            playlistDropdown.classList.remove("show");
         }
     });
 
@@ -437,7 +552,7 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.removeItem("myPlaylists");
         localStorage.removeItem("artistFollows");
         renderUserInfo();
-        myPlaylist();
+        await myPlaylist();
         await httpRequest.post("auth/logout");
         // TODO: Students will implement logout logic here
     });
@@ -452,13 +567,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     await renderUserInfo();
     const myPlaylists = JSON.parse(localStorage.getItem("myPlaylists"));
     if (myPlaylists) {
-        myPlaylist([myPlaylists], "playlist");
+        await myPlaylist([myPlaylists], "playlist");
     }
 });
 async function search(path) {
     try {
         const { results } = await httpRequest.get(path);
-        console.log(results);
         return results;
     } catch (error) {}
 }
@@ -495,7 +609,6 @@ function toggleMainContent(
         ? playlistSection.classList.add("show")
         : playlistSection.classList.remove("show");
 }
-async function addTracksToPlaylists() {}
 
 async function renderUserInfo() {
     const authButtons = document.querySelector(".auth-buttons");
@@ -522,7 +635,7 @@ async function getMyPlayLists() {
         return playlists;
     } catch (error) {}
 }
-function myPlaylist(list, type) {
+async function myPlaylist(list, type) {
     const navPlaylistBtn = document.querySelector(".nav-playlist-btn");
     const navArtistsBtn = document.querySelector(".nav-artists-btn");
     const libraryContent = document.querySelector(".library-content");
@@ -537,11 +650,9 @@ function myPlaylist(list, type) {
                     type || playlist.type
                 )}" data-id="${EscapeHtml(playlist.id)}">
               <img
-                src="${
-                    EscapeHtml(playlist.image_url) || "placeholder.svg"
-                }?height=48&width=48"
+                src="${EscapeHtml(playlist.image_url)}?height=48&width=48"
                 alt="${EscapeHtml(playlist.name || playlist.title)}"
-                class="item-image" onerror=" this.onerror=null ;this.src='placeholder.svg';"
+                class="item-image" onerror=" this.onerror=null ;this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9C76COoU19vxN_sXxYEFBhFbJlfN42zstWg&s';"
               />
               <div class="item-info">
                 <div class="item-title">${EscapeHtml(
@@ -555,9 +666,23 @@ function myPlaylist(list, type) {
                 libraryContent.appendChild(playlistItem);
             });
         });
+        const res = await httpRequest.get("me/tracks/liked?limit=20&offset=0");
+        const divElement = document.createElement("div");
+        divElement.innerHTML = `<div class="library-item active">       
+                                    <div class="item-icon liked-songs">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <div class="item-info">
+                                        <div class="item-title">Liked Songs</div>
+                                        <div class="item-subtitle">
+                                            <i class="fas fa-thumbtack"></i>
+                                            Playlist • ${res.tracks.length} songs
+                                        </div>
+                                    </div>
+                                </div>`;
+        libraryContent.prepend(divElement);
     }
 }
-
 async function getArtistFollows() {
     try {
         // chưa có API nên  lấy all artistsFollow
@@ -593,6 +718,21 @@ async function myArtistFollows() {
             </div>`;
             libraryContent.appendChild(artistItem);
         });
+        const res = await httpRequest.get("me/tracks/liked?limit=20&offset=0");
+        const divElement = document.createElement("div");
+        divElement.innerHTML = `<div class="library-item active">       
+                                    <div class="item-icon liked-songs">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <div class="item-info">
+                                        <div class="item-title">Liked Songs</div>
+                                        <div class="item-subtitle">
+                                            <i class="fas fa-thumbtack"></i>
+                                            Playlist • ${res.tracks.length} songs
+                                        </div>
+                                    </div>
+                                </div>`;
+        libraryContent.prepend(divElement);
     }
 }
 async function artistsTrending() {
