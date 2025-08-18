@@ -222,6 +222,12 @@
     min-width: 0;
     flex: 1;
     max-width: 300px;
+    opacity: 0;
+    visibility: hidden;
+}
+.player-left.show {
+    opacity: 1;
+    visibility: visible;
 }
 
 .player-image {
