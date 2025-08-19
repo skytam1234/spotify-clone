@@ -324,14 +324,22 @@
                             <i class="fas fa-redo"></i>
                         </button>
                     </div>
-                    <div class="progress-container progress-bar">
-                        <span class="time">0:52</span>
-                        <div class="progress-bar">
+                    <form class="progress-container">
+                        <span class="time time-current">0:00</span>
+                        <!-- <div class="progress-bar">
                             <div class="progress-fill" style="width: 20%"></div>
                             <div class="progress-handle"></div>
-                        </div>
-                        <span class="time">4:59</span>
-                    </div>
+                        </div> -->
+                        <input
+                            class="progress-bar"
+                            type="range"
+                            value="0"
+                            step="1"
+                            min="0"
+                            max="100"
+                        />
+                        <span class="time time-duration">4:59</span>
+                    </form>
                 </div>
 
                 <div class="player-right">

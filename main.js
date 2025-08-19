@@ -305,41 +305,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 const playlist = await httpRequest.get(`playlists/${id}`);
                 const tracks = await httpRequest.get(`playlists/${id}/tracks`);
                 if (tracks.tracks.length > 0) {
-                    trackList.innerHTML = "";
-                    let html = "";
-                    //thêm <i class="fas fa-volume-up playing-icon"></i>  vào tracks-number sẽ có cá loa
-                    tracks.tracks.forEach((track, index) => {
-                        html += `<div class="track-item" data-index=${index}>
-                                <div class="track-number">
-                                                                                                           
-                                </div>
-                                <div class="track-image">
-                                    <img
-                                        src="http://spotify.f8team.dev/${
-                                            track.track_image_url
-                                        }?height=40&width=40"
-                                        alt="Lối Nhỏ"
-                                    />
-                                </div>
-                                <div class="track-info">
-                                    <div class="track-name playing-text">
-                                        ${track.track_title}
-                                    </div>
-                                </div>
-                                <div class="track-plays">${
-                                    track.track_play_count
-                                }</div>
-                                <div class="track-duration">${
-                                    (track.track_duration -
-                                        (track.track_duration % 60)) /
-                                    60
-                                }:${track.track_duration % 60}</div>
-                                <button class="track-menu-btn">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
-                            </div>`;
-                    });
-                    trackList.innerHTML = html;
+                    renderTrackList(tracks.tracks);
                     musicPlayer.songList = tracks.tracks;
                     const data = {
                         currentPlaylist: tracks.tracks,
@@ -585,6 +551,8 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.removeItem("user");
         localStorage.removeItem("myPlaylists");
         localStorage.removeItem("artistFollows");
+        localStorage.removeItem("currentPlayer");
+        localStorage.removeItem("currentPlaylist");
         renderUserInfo();
         await myPlaylist();
         await httpRequest.post("auth/logout");
@@ -620,7 +588,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const playerArtist = playerLeft.querySelector(".player-artist");
         const playerImage = playerLeft.querySelector(".player-image");
         const addTrackToLikedListBtn = playerLeft.querySelector(".add-btn");
-        // const iconPlay = item.querySelector(".icon-play");
+        const iconPlay = item.querySelector(".icon-play");
         const oldIconPlayTracks = document.querySelectorAll(".fa-pause");
         if (item) {
             playerLeft.classList.remove("show");
@@ -657,18 +625,18 @@ document.addEventListener("DOMContentLoaded", async function () {
                 const { tracks } = await httpRequest.get(
                     `${type + "s/" + id}/tracks/popular`
                 );
+                const artist = await httpRequest.get(`artists/${id}`);
+
+                toggleMainContent(false, false, true, true, true, false);
                 const check = musicPlayer.songList;
                 musicPlayer.isPlaying = !musicPlayer.isPlaying;
-
                 musicPlayer.songList = tracks;
-
                 const data = {
                     currentPlaylist: tracks,
                     currentTrackIndex: 0,
                 };
                 localStorage.setItem("currentPlayer", JSON.stringify(data));
                 musicPlayer.initialize();
-
                 musicPlayer.togglePlayPause();
             }
         }
@@ -919,54 +887,113 @@ function EscapeHtml(str) {
     div.textContent = str;
     return div.innerHTML;
 }
+function renderTrackList(tracks) {
+    console.log(tracks);
+    const artistHeroTitle = document.querySelector(".artist-hero-title");
+    const artistHeroSubtitle = document.querySelector(".artist-hero-subtitle");
+    const heroImage = document.querySelector(".hero-image");
+    const trackList = document.querySelector(".track-list");
+    const { currentTrackIndex } = JSON.parse(
+        localStorage.getItem("currentPlayer")
+    );
+    trackList.innerHTML = "";
+    let html = "";
+    tracks.forEach(async (track, index) => {
+        html += `<div class="track-item" data-index=${index}>
+                                <div class="track-number">
+                                     ${
+                                         index === currentTrackIndex
+                                             ? '<i class="fas fa-volume-up playing-icon"></i>'
+                                             : ""
+                                     }                                                                      
+                                </div>
+                                <div class="track-image">
+                                    <img
+                                        src="${
+                                            track.image_url ||
+                                            "http://spotify.f8team.dev" +
+                                                track.track_image_url ||
+                                            track.track_image_url
+                                        }?height=40&width=40"
+                                        alt="Lối Nhỏ"
+                                    />
+                                </div>
+                                <div class="track-info">
+                                    <div class="track-name playing-text">
+                                        ${track.title || track.track_title}
+                                    </div>
+                                </div>
+                                <div class="track-plays">${
+                                    track.play_count || track.track_play_count
+                                }</div>
+                                <div class="track-duration">${
+                                    (track.duration ||
+                                        track.track_duration -
+                                            ((track.duration ||
+                                                track.track_duration) %
+                                                60)) / 60
+                                }:${
+            (track.duration || track.track_duration) % 60
+        }</div>
+                                <button class="track-menu-btn">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>`;
+        const trackInf = await httpRequest.get(
+            `tracks/${track.track_id || track.id}`
+        );
+        console.log(trackInf);
+        heroImage.src = trackInf.image_url || track.album_cover_image_url;
+        artistHeroTitle.textContent =
+            trackInf.title || track.track_title || track.name || track.title;
+        artistHeroSubtitle.textContent =
+            trackInf.artist_name ||
+            track.artist_name ||
+            track.description ||
+            track.bio;
+    });
+    trackList.innerHTML = html;
+}
 const musicPlayer = {
-    NEXT_SONG: 1, // Chuyển sang bài kế tiếp
-    PREV_SONG: -1, // Quay lại bài trước
-    PREV_RESET_TIME: 2, // Thời gian tối thiểu (giây) để reset bài hiện tại thay vì chuyển bài trước
+    NEXT_SONG: 1,
+    PREV_SONG: -1,
+    PREV_RESET_TIME: 2,
 
     STORAGE_KEYS: {
-        LOOP_MODE: "musicPlayer_loopMode", // Key lưu trạng thái chế độ lặp lại
-        SHUFFLE_MODE: "musicPlayer_shuffleMode", // Key lưu trạng thái chế độ phát ngẫu nhiên
+        LOOP_MODE: "musicPlayer_loopMode",
+        SHUFFLE_MODE: "musicPlayer_shuffleMode",
     },
-
-    // Các element DOM - lấy từ HTML
-    playlistContainer: document.querySelector(".playlist"), // Container chứa danh sách bài hát
-    playLargeToggleBtn: document.querySelector(".play-btn-large"), // Nút play/pause chính
+    playlistContainer: document.querySelector(".playlist"),
+    playLargeToggleBtn: document.querySelector(".play-btn-large"),
     playToggleBtn: document.querySelector(".play-btn"),
-    currentSongTitle: document.querySelector(".current-song-title"), // Hiển thị tên bài đang phát
-    audioPlayer: document.querySelector(".audio-player"), // Element audio HTML5
+    currentSongTitle: document.querySelector(".current-song-title"),
+    audioPlayer: document.querySelector(".audio-player"),
     playIcon: document.querySelector(".play-icon"),
-    playIconLarge: document.querySelector(".play-icon-large"), // Icon play/pause
-    prevBtn: document.querySelector(".btn-prev"), // Nút bài trước
-    nextBtn: document.querySelector(".btn-next"), // Nút bài kế tiếp
-    loopBtn: document.querySelector(".btn-loop"), // Nút lặp lại
-    shuffleBtn: document.querySelector(".btn-shuffle"), // Nút phát ngẫu nhiên
-    progressBar: document.querySelector(".progress-bar"), // Thanh tiến trình
+    playIconLarge: document.querySelector(".play-icon-large"),
+    prevBtn: document.querySelector(".btn-prev"),
+    nextBtn: document.querySelector(".btn-next"),
+    loopBtn: document.querySelector(".btn-loop"),
+    shuffleBtn: document.querySelector(".btn-shuffle"),
+    progressBar: document.querySelector(".progress-bar"),
 
     playerLeft: document.querySelector(".player-left"),
     playerTitle: document.querySelector(".player-title"),
     playerArtist: document.querySelector(".player-artist"),
     playerImage: document.querySelector(".player-image"),
     addTrackToLikedListBtn: document.querySelector(".add-btn"),
-    //songList: null,
-    // Danh sách bài hát
-    songList: null,
-    currentSongIndex: 0, // Chỉ số bài hát hiện tại trong mảng
-    isPlaying: false, // Trạng thái đang phát hay không
-    isLoopMode: false, // Chế độ lặp lại (sẽ được load từ localStorage)
-    isShuffleMode: false, // Chế độ phát ngẫu nhiên (sẽ được load từ localStorage)
 
-    // Hàm khởi tạo - được gọi đầu tiên để thiết lập player
+    songList: null,
+    currentSongIndex: 0,
+    isPlaying: false,
+    isLoopMode: false,
+    isShuffleMode: false,
+
     async initialize() {
-        // Load trạng thái từ localStorage
         this.loadPlayerState();
-        // Thiết lập bài hát đầu tiên
         this.setupCurrentSong();
-        // Thiết lập các sự kiện DOM
         this.setupEventListeners();
     },
 
-    // Load trạng thái player từ localStorage
     loadPlayerState() {
         this.isLoopMode =
             localStorage.getItem(this.STORAGE_KEYS.LOOP_MODE) === "true";
@@ -974,33 +1001,25 @@ const musicPlayer = {
             localStorage.getItem(this.STORAGE_KEYS.SHUFFLE_MODE) === "true";
     },
 
-    // Thiết lập tất cả các sự kiện click, change cho các element
     setupEventListeners() {
-        // Sự kiện click nút play/pause chính
         this.playToggleBtn.onclick = this.togglePlayPause.bind(this);
 
-        // Sự kiện khi audio bắt đầu phát
         this.audioPlayer.onplay = () => {
             this.isPlaying = true;
-            // Đổi icon từ play sang pause
             this.playIcon.classList.remove("fa-play");
             this.playIcon.classList.add("fa-pause");
         };
 
-        // Sự kiện khi audio bị dừng
         this.audioPlayer.onpause = () => {
             this.isPlaying = false;
-            // Đổi icon từ pause sang play
             this.playIcon.classList.remove("fa-pause");
             this.playIcon.classList.add("fa-play");
         };
 
-        // Sự kiện click nút bài trước
         this.prevBtn.onclick = this.handleSongNavigation.bind(
             this,
             this.PREV_SONG
         );
-        // Sự kiện click nút bài kế tiếp
         this.nextBtn.onclick = this.handleSongNavigation.bind(
             this,
             this.NEXT_SONG
@@ -1133,6 +1152,7 @@ const musicPlayer = {
             };
 
             localStorage.setItem("currentPlayer", JSON.stringify(data));
+            renderTrackList(this.songList);
             // Cập nhật tiêu đề bài hát đang phát
             this.playerLeft.classList.remove("show");
             this.playerLeft.classList.add("show");
@@ -1146,7 +1166,8 @@ const musicPlayer = {
         }
 
         // Tải file audio
-        this.audioPlayer.src = currentSong?.audio_url;
+        this.audioPlayer.src =
+            currentSong?.audio_url || currentSong?.track_audio_url;
 
         // Cập nhật trạng thái các nút
         this.updateLoopButtonState();
