@@ -1,107 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đen - Spotify</title>
-    <!-- Font Awesome CDN -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/tippy.js@5/animations/scale.css"
-    />
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Đen - Spotify</title>
+        <!-- Font Awesome CDN -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/tippy.js@5/animations/scale.css"
+        />
 
-    <link rel="stylesheet" href="css/reset.css" />
-    <link rel="stylesheet" href="css/variables.css" />
-    <link rel="stylesheet" href="css/components.css" />
-    <link rel="stylesheet" href="css/layout.css" />
-    <link rel="stylesheet" href="css/responsive.css" />
-  </head>
-  <body>
-    <div class="app-container">
-      <!-- Left Sidebar -->
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <div class="logo">
-            <i class="fab fa-spotify"></i>
-          </div>
-        </div>
-
-        <nav class="sidebar-nav">
-          <div class="nav-section">
-            <h2 class="section-title">Your Library</h2>
-            <button class="create-btn">
-              <i class="fas fa-plus"></i>
-              Create
-            </button>
-            <div class="playlist-dropdown">
-              <div class="menu">
-                <div class="menu-item" id="createPlaylist">
-                  <div class="menu-item-icon">🎵</div>
-                  <div class="menu-item-title">
-                    <h3>Playlist</h3>
-                    <p>Tạo danh sách phát gồm các bài hát hoặc tập podcast</p>
-                  </div>
+        <link rel="stylesheet" href="css/reset.css" />
+        <link rel="stylesheet" href="css/variables.css" />
+        <link rel="stylesheet" href="css/components.css" />
+        <link rel="stylesheet" href="css/layout.css" />
+        <link rel="stylesheet" href="css/responsive.css" />
+    </head>
+    <body>
+        <div class="app-container">
+            <!-- Left Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <i class="fab fa-spotify"></i>
+                    </div>
                 </div>
-                <div class="saparate"></div>
-                <div class="menu-item" id="likedSongs">
-                  <div class="menu-item-icon">🎶</div>
-                  <div class="menu-item-title">
-                    <h3>Giai điệu chung</h3>
-                    <p>Tạo danh sách phát tổng hợp gu nhạc của bạn bè</p>
-                  </div>
-                </div>
-                <div class="menu-item" id="folderPlaylist">
-                  <div class="menu-item-icon">🎵</div>
-                  <div class="menu-item-title">
-                    <h3>Thư mục</h3>
-                    <p>TSắp xếp danh sách phát của bạn</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="nav-tabs">
-            <button class="nav-tab active nav-playlist-btn">Playlists</button>
-            <button class="nav-tab nav-artists-btn">Artists</button>
-          </div>
+                <nav class="sidebar-nav">
+                    <div class="nav-section">
+                        <h2 class="section-title">Your Library</h2>
+                        <button class="create-btn">
+                            <i class="fas fa-plus"></i>
+                            Create
+                        </button>
+                        <div class="playlist-dropdown">
+                            <div class="menu">
+                                <div class="menu-item" id="createPlaylist">
+                                    <div class="menu-item-icon">🎵</div>
+                                    <div class="menu-item-title">
+                                        <h3>Playlist</h3>
+                                        <p>
+                                            Tạo danh sách phát gồm các bài hát
+                                            hoặc tập podcast
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="saparate"></div>
+                                <div class="menu-item" id="likedSongs">
+                                    <div class="menu-item-icon">🎶</div>
+                                    <div class="menu-item-title">
+                                        <h3>Giai điệu chung</h3>
+                                        <p>
+                                            Tạo danh sách phát tổng hợp gu nhạc
+                                            của bạn bè
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="menu-item" id="folderPlaylist">
+                                    <div class="menu-item-icon">🎵</div>
+                                    <div class="menu-item-title">
+                                        <h3>Thư mục</h3>
+                                        <p>TSắp xếp danh sách phát của bạn</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-          <div class="search-library">
-            <button class="search-library-btn">
-              <i class="fas fa-search"></i>
-            </button>
-            <button class="sort-btn">
-              Recents
-              <i class="fas fa-list"></i>
-            </button>
-          </div>
-          <div class="dropdown-search-library">
-            <input type="text" id="searchLibrary" placeholder="Tìm kiếm..." />
-          </div>
+                    <div class="nav-tabs">
+                        <button class="nav-tab active nav-playlist-btn">
+                            Playlists
+                        </button>
+                        <button class="nav-tab nav-artists-btn">Artists</button>
+                    </div>
 
-          <div class="library-content">
-            <div class="library-item active">
-              <div class="item-icon liked-songs">
-                <i class="fas fa-heart"></i>
-              </div>
-              <div class="item-info">
-                <div class="item-title">Liked Songs</div>
-                <div class="item-subtitle">
-                  <i class="fas fa-thumbtack"></i>
-                  Playlist • 3 songs
-                </div>
-              </div>
-            </div>
+                    <div class="search-library">
+                        <button class="search-library-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button class="sort-btn">
+                            Recents
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    <div class="dropdown-search-library">
+                        <input
+                            type="text"
+                            id="searchLibrary"
+                            placeholder="Tìm kiếm..."
+                        />
+                    </div>
 
-            <!-- <div class="library-item">
+                    <div class="library-content">
+                        <div class="library-item active">
+                            <div class="item-icon liked-songs">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="item-info">
+                                <div class="item-title">Liked Songs</div>
+                                <div class="item-subtitle">
+                                    <i class="fas fa-thumbtack"></i>
+                                    Playlist • 3 songs
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- <div class="library-item">
               <img
                 src="placeholder.svg?height=48&width=48"
                 alt="Đen"
@@ -112,117 +124,119 @@
                 <div class="item-subtitle">Artist</div>
               </div>
             </div> -->
-          </div>
-        </nav>
-      </aside>
-      <!-- Main Content -->
-      <main class="main-content">
-        <header class="main-header">
-          <div class="search-container">
-            <div class="search-box">
-              <button class="home-btn">
-                <i class="fas fa-home"></i>
-              </button>
-              <div class="search-input-wrapper">
-                <i class="fas fa-search search-icon"></i>
-                <input
-                  type="text"
-                  placeholder="What do you want to play?"
-                  class="search-input"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="header-actions">
-            <div class="auth-buttons">
-              <button class="auth-btn signup-btn">Sign up</button>
-              <button class="auth-btn login-btn">Log in</button>
-            </div>
-            <div class="user-menu">
-              <div class="user-info">
-                <button class="user-avatar" id="userAvatar">
-                  <img
-                    src="placeholder.svg"
-                    alt="User Avatar"
-                    class="user-avatar-img"
-                  />
-                </button>
-              </div>
-              <div class="user-dropdown" id="userDropdown">
-                <div class="dropdown-item" id="logoutBtn">
-                  <i class="fas fa-sign-out-alt"></i>
-                  <span>Log out</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-        <div class="content-wrapper">
-          <!-- Today's Biggest Hits Section -->
-          <section class="hits-section">
-            <div class="section-header">
-              <h2 class="section-heading">Today's biggest hits</h2>
-            </div>
-            <div class="hits-grid"></div>
-          </section>
+                    </div>
+                </nav>
+            </aside>
+            <!-- Main Content -->
+            <main class="main-content">
+                <header class="main-header">
+                    <div class="search-container">
+                        <div class="search-box">
+                            <button class="home-btn">
+                                <i class="fas fa-home"></i>
+                            </button>
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search search-icon"></i>
+                                <input
+                                    type="text"
+                                    placeholder="What do you want to play?"
+                                    class="search-input"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <div class="auth-buttons">
+                            <button class="auth-btn signup-btn">Sign up</button>
+                            <button class="auth-btn login-btn">Log in</button>
+                        </div>
+                        <div class="user-menu">
+                            <div class="user-info">
+                                <button class="user-avatar" id="userAvatar">
+                                    <img
+                                        src="placeholder.svg"
+                                        alt="User Avatar"
+                                        class="user-avatar-img"
+                                    />
+                                </button>
+                            </div>
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="dropdown-item" id="logoutBtn">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Log out</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <div class="content-wrapper">
+                    <!-- Today's Biggest Hits Section -->
+                    <section class="hits-section">
+                        <div class="section-header">
+                            <h2 class="section-heading">
+                                Today's biggest hits
+                            </h2>
+                        </div>
+                        <div class="hits-grid"></div>
+                    </section>
 
-          <!-- Popular Artists Section -->
-          <section class="artists-section">
-            <div class="section-header">
-              <h2 class="section-heading">Popular artists</h2>
-            </div>
-            <div class="artists-grid"></div>
-          </section>
+                    <!-- Popular Artists Section -->
+                    <section class="artists-section">
+                        <div class="section-header">
+                            <h2 class="section-heading">Popular artists</h2>
+                        </div>
+                        <div class="artists-grid"></div>
+                    </section>
 
-          <!-- Album -->
-          <!-- <section class="album-section">
+                    <!-- Album -->
+                    <!-- <section class="album-section">
                         <div class="section-header">
                             <h2 class="section-heading">Popular artists</h2>
                         </div>
                         <div class="album-grid"></div>
                     </section> -->
-          <!-- Playlist -->
-          <!-- <section class="content-playlist-section"> -->
-          <!-- <div class="section-header">
+                    <!-- Playlist -->
+                    <!-- <section class="content-playlist-section"> -->
+                    <!-- <div class="section-header">
                             <h2 class="section-heading">Popular artists</h2>
                         </div>
                         <div class="content-playlist-grid"></div>
                     </section> -->
 
-          <!-- Artist Hero Section -->
-          <section class="artist-hero">
-            <div class="hero-background">
-              <img
-                src="https://i.pinimg.com/736x/cd/f5/1a/cdf51aaa3c71d3482217d44fc0a09c57.jpg"
-                alt="Đen artist background"
-                class="hero-image"
-              />
-              <div class="hero-overlay"></div>
-            </div>
-            <div class="hero-content">
-              <div class="verified-badge">
-                <!-- <i class="fas fa-check-circle"></i>
+                    <!-- Artist Hero Section -->
+                    <section class="artist-hero">
+                        <div class="hero-background">
+                            <img
+                                src="https://i.pinimg.com/736x/cd/f5/1a/cdf51aaa3c71d3482217d44fc0a09c57.jpg"
+                                alt="Đen artist background"
+                                class="hero-image"
+                            />
+                            <div class="hero-overlay"></div>
+                        </div>
+                        <div class="hero-content">
+                            <div class="verified-badge">
+                                <!-- <i class="fas fa-check-circle"></i>
                                 <span>Verified Artist</span> -->
-              </div>
-              <h1 class="artist-name artist-hero-title">Đen</h1>
-              <p class="monthly-listeners artist-hero-subtitle">
-                1,021,833 monthly listeners
-              </p>
-            </div>
-          </section>
+                            </div>
+                            <h1 class="artist-name artist-hero-title">Đen</h1>
+                            <p class="monthly-listeners artist-hero-subtitle">
+                                1,021,833 monthly listeners
+                            </p>
+                        </div>
+                    </section>
 
-          <!-- Artist Controls -->
-          <section class="artist-controls">
-            <button class="play-btn-large">
-              <i class="fas fa-play play-icon-large-btn"></i>
-            </button>
-          </section>
+                    <!-- Artist Controls -->
+                    <section class="artist-controls">
+                        <button class="play-btn-large">
+                            <i class="fas fa-play play-icon-large-btn"></i>
+                        </button>
+                    </section>
 
-          <!-- Popular Tracks -->
-          <section class="popular-section">
-            <h2 class="section-title">Danh sách bài hát của tôi</h2>
-            <div class="track-list">
-              <!-- <div class="track-item playing">
+                    <!-- Popular Tracks -->
+                    <section class="popular-section">
+                        <h2 class="section-title">Danh sách bài hát của tôi</h2>
+                        <div class="track-list">
+                            <!-- <div class="track-item playing">
                                 <div class="track-number">
                                     <i
                                         class="fas fa-volume-up playing-icon"
@@ -245,213 +259,237 @@
                                     <i class="fas fa-ellipsis-h"></i>
                                 </button>
                             </div> -->
-            </div>
-            <div class="add-tracks">
-              <div class="add-tracks-btn">Tìm thêm</div>
-            </div>
-          </section>
-          <section class="playlist-section">
-            <div class="create-playlist-modal">
-              <hr class="playlist-divider" />
-              <div class="playlist-content">
-                <h2 class="playlist-heading">
-                  Hãy cùng tìm nội dung cho danh sách phát của bạn
-                </h2>
-                <div class="playlist-search">
-                  <input
-                    type="text"
-                    placeholder="Tìm bài hát và tập podcast"
-                    id="playlist-search__input"
-                  />
+                        </div>
+                        <div class="add-tracks">
+                            <div class="add-tracks-btn">Tìm thêm</div>
+                        </div>
+                    </section>
+                    <section class="playlist-section">
+                        <div class="create-playlist-modal">
+                            <hr class="playlist-divider" />
+                            <div class="playlist-content">
+                                <h2 class="playlist-heading">
+                                    Hãy cùng tìm nội dung cho danh sách phát của
+                                    bạn
+                                </h2>
+                                <div class="playlist-search">
+                                    <input
+                                        type="text"
+                                        placeholder="Tìm bài hát và tập podcast"
+                                        id="playlist-search__input"
+                                    />
+                                </div>
+                                <button class="playlist-close">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="dropdown-playlist-content"></div>
+                        </div>
+                    </section>
                 </div>
-                <button class="playlist-close">
-                  <span>&times;</span>
-                </button>
-              </div>
-              <div class="dropdown-playlist-content"></div>
-            </div>
-          </section>
-        </div>
-      </main>
+            </main>
 
-      <!-- Bottom Player -->
-      <footer class="player">
-        <div class="player-left">
-          <div class="id-tracks-hidden" hidden></div>
-          <img
-            src="placeholder.svg?height=56&width=56"
-            alt="Current track"
-            class="player-image"
-          />
-          <div class="player-info">
-            <div class="player-title"></div>
-            <div class="player-artist"></div>
-          </div>
-          <button class="add-btn add-liked-btn">
-            <i class="fa-solid fa-plus"></i>
-          </button>
-        </div>
+            <!-- Bottom Player -->
+            <footer class="player">
+                <div class="player-left">
+                    <div class="id-tracks-hidden" hidden></div>
+                    <img
+                        src="placeholder.svg?height=56&width=56"
+                        alt="Current track"
+                        class="player-image"
+                    />
+                    <div class="player-info">
+                        <div class="player-title"></div>
+                        <div class="player-artist"></div>
+                    </div>
+                    <button class="add-btn add-liked-btn">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
 
-        <div class="player-center">
-          <div class="player-controls">
-            <button class="control-btn btn-loop active">
-              <i class="fas fa-random"></i>
-            </button>
-            <button class="control-btn btn-prev">
-              <i class="fas fa-step-backward"></i>
-            </button>
-            <button class="control-btn play-btn">
-              <i class="fas fa-pause play-icon"></i>
-            </button>
-            <button class="control-btn btn-next">
-              <i class="fas fa-step-forward"></i>
-            </button>
-            <button class="control-btn btn-shuffle">
-              <i class="fas fa-redo"></i>
-            </button>
-          </div>
-          <form class="progress-container">
-            <span class="time time-current">0:00</span>
-            <!-- <div class="progress-bar">
+                <div class="player-center">
+                    <div class="player-controls">
+                        <button class="control-btn btn-loop active">
+                            <i class="fas fa-random"></i>
+                        </button>
+                        <button class="control-btn btn-prev">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button class="control-btn play-btn">
+                            <i class="fas fa-play play-icon"></i>
+                        </button>
+                        <button class="control-btn btn-next">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                        <button class="control-btn btn-shuffle">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    <form class="progress-container">
+                        <span class="time time-current">0:00</span>
+                        <!-- <div class="progress-bar">
                             <div class="progress-fill" style="width: 20%"></div>
                             <div class="progress-handle"></div>
                         </div> -->
-            <input
-              class="progress-bar"
-              type="range"
-              value="0"
-              step="1"
-              min="0"
-              max="100"
-            />
-            <span class="time time-duration">4:59</span>
-          </form>
+                        <input
+                            class="progress-bar"
+                            type="range"
+                            value="0"
+                            step="1"
+                            min="0"
+                            max="100"
+                        />
+                        <span class="time time-duration">4:59</span>
+                    </form>
+                </div>
+
+                <div class="player-right">
+                    <button class="control-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <div class="volume-container">
+                        <button class="control-btn">
+                            <i class="fas fa-volume-down"></i>
+                        </button>
+                        <input
+                            class="volume-bar"
+                            type="range"
+                            value="50"
+                            step="1"
+                            min="0"
+                            max="100"
+                        />
+                    </div>
+                    <button class="control-btn">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </footer>
+            <!-- audio -->
+            <audio src="" class="audio-player"></audio>
         </div>
 
-        <div class="player-right">
-          <button class="control-btn">
-            <i class="fas fa-microphone"></i>
-          </button>
-          <div class="volume-container">
-            <button class="control-btn">
-              <i class="fas fa-volume-down"></i>
-            </button>
-            <div class="volume-bar">
-              <div class="volume-fill" style="width: 70%"></div>
-              <div class="volume-handle"></div>
+        <!-- Auth Modal -->
+        <div class="modal-overlay" id="authModal">
+            <div class="modal-container">
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <div class="modal-content">
+                    <div class="modal-logo">
+                        <i class="fab fa-spotify"></i>
+                    </div>
+
+                    <!-- Sign Up Form -->
+                    <div class="auth-form" id="signupForm">
+                        <h1 class="modal-heading">
+                            Sign up to start listening
+                        </h1>
+
+                        <form class="auth-form-content auth-form-signup">
+                            <div class="form-group invalid">
+                                <input
+                                    type="email"
+                                    placeholder="Email address"
+                                    class="form-input"
+                                    id="signupEmail"
+                                    required
+                                    pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                                />
+                                <div class="error-message">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span
+                                        >Please enter a valid email
+                                        address</span
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <input
+                                    type="password"
+                                    placeholder="Password"
+                                    class="form-input"
+                                    id="signupPassword"
+                                    required
+                                    minlength="6"
+                                />
+                                <div class="error-message">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span
+                                        >Password must be at least 6
+                                        characters</span
+                                    >
+                                </div>
+                            </div>
+
+                            <button type="submit" class="auth-submit-btn">
+                                Sign Up
+                            </button>
+                        </form>
+
+                        <div class="auth-switch">
+                            <span>Already have an account? </span>
+                            <button class="auth-link" id="showLogin">
+                                Log in here
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Login Form -->
+                    <div class="auth-form" id="loginForm" style="display: none">
+                        <h1 class="modal-heading">Log in to Spotify</h1>
+
+                        <form class="auth-form-content auth-form-login">
+                            <div class="form-group invalid">
+                                <input
+                                    type="email"
+                                    placeholder="Email address"
+                                    class="form-input"
+                                    id="loginEmail"
+                                />
+                                <div class="error-message">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span
+                                        >Please enter a valid email
+                                        address</span
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <input
+                                    type="password"
+                                    placeholder="Password"
+                                    class="form-input"
+                                    id="loginPassword"
+                                />
+                                <div class="error-message">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Please enter your password</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="auth-submit-btn">
+                                Log In
+                            </button>
+                        </form>
+
+                        <div class="auth-switch">
+                            <span>Don't have an account? </span>
+                            <button class="auth-link" id="showSignup">
+                                Sign up here
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <button class="control-btn">
-            <i class="fas fa-expand"></i>
-          </button>
         </div>
-      </footer>
-      <!-- audio -->
-      <audio src="" class="audio-player"></audio>
-    </div>
-
-    <!-- Auth Modal -->
-    <div class="modal-overlay" id="authModal">
-      <div class="modal-container">
-        <button class="modal-close" id="modalClose">
-          <i class="fas fa-times"></i>
-        </button>
-
-        <div class="modal-content">
-          <div class="modal-logo">
-            <i class="fab fa-spotify"></i>
-          </div>
-
-          <!-- Sign Up Form -->
-          <div class="auth-form" id="signupForm">
-            <h1 class="modal-heading">Sign up to start listening</h1>
-
-            <form class="auth-form-content auth-form-signup">
-              <div class="form-group invalid">
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  class="form-input"
-                  id="signupEmail"
-                  required
-                  pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-                />
-                <div class="error-message">
-                  <i class="fas fa-info-circle"></i>
-                  <span>Please enter a valid email address</span>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <input
-                  type="password"
-                  placeholder="Password"
-                  class="form-input"
-                  id="signupPassword"
-                  required
-                  minlength="6"
-                />
-                <div class="error-message">
-                  <i class="fas fa-info-circle"></i>
-                  <span>Password must be at least 6 characters</span>
-                </div>
-              </div>
-
-              <button type="submit" class="auth-submit-btn">Sign Up</button>
-            </form>
-
-            <div class="auth-switch">
-              <span>Already have an account? </span>
-              <button class="auth-link" id="showLogin">Log in here</button>
-            </div>
-          </div>
-
-          <!-- Login Form -->
-          <div class="auth-form" id="loginForm" style="display: none">
-            <h1 class="modal-heading">Log in to Spotify</h1>
-
-            <form class="auth-form-content auth-form-login">
-              <div class="form-group invalid">
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  class="form-input"
-                  id="loginEmail"
-                />
-                <div class="error-message">
-                  <i class="fas fa-info-circle"></i>
-                  <span>Please enter a valid email address</span>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <input
-                  type="password"
-                  placeholder="Password"
-                  class="form-input"
-                  id="loginPassword"
-                />
-                <div class="error-message">
-                  <i class="fas fa-info-circle"></i>
-                  <span>Please enter your password</span>
-                </div>
-              </div>
-
-              <button type="submit" class="auth-submit-btn">Log In</button>
-            </form>
-
-            <div class="auth-switch">
-              <span>Don't have an account? </span>
-              <button class="auth-link" id="showSignup">Sign up here</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- JS -->
-    <script src="https://unpkg.com/popper.js@1"></script>
-    <script src="https://unpkg.com/tippy.js@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
-    <script src="main.js" type="module"></script>
-  </body>
+        <!-- JS -->
+        <script src="https://unpkg.com/popper.js@1"></script>
+        <script src="https://unpkg.com/tippy.js@5"></script>
+        <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
+        <script src="main.js" type="module"></script>
+    </body>
 </html>
