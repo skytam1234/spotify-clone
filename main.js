@@ -602,6 +602,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const addLikedBtn = document.querySelector(".add-liked-btn");
     const idTracksHidden = document.querySelector(".id-tracks-hidden");
     const trackList = document.querySelector(".track-list");
+
     addLikedBtn.addEventListener("click", async (e) => {
         try {
             const id = idTracksHidden.textContent;
@@ -683,6 +684,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
     });
+
     trackList.addEventListener("click", (e) => {
         const trackItem = e.target.closest(".track-item");
         if (trackItem) {
@@ -1047,12 +1049,16 @@ const musicPlayer = {
     playIconLargeBtn: document.querySelector(".play-icon-large-btn"),
     idTracksHidden: document.querySelector(".id-tracks-hidden"),
     timeCurrent: document.querySelector(".time-current"),
+    volumeBar: document.querySelector(".volume-bar"),
+    muteBtn: document.querySelector(".mute-btn"),
 
     songList: null,
     currentSongIndex: 0,
+    currentVolume: 0.5,
     isPlaying: false,
     isLoopMode: false,
     isShuffleMode: false,
+    isMute: false,
 
     async initialize() {
         this.loadPlayerState();
@@ -1149,10 +1155,29 @@ const musicPlayer = {
 
             this.progressBar.seeking = false;
         };
+        this.volumeBar.oninput = () => {
+            this.currentVolume = this.volumeBar.value / 100;
+            this.audioPlayer.volume = this.currentVolume;
+        };
 
         // Sự kiện khi bài hát kết thúc
         this.audioPlayer.onended = () => {
             this.handleSongNavigation(this.NEXT_SONG);
+        };
+        this.muteBtn.onclick = () => {
+            console.log(this.muteBtn);
+            let html = "";
+            this.isMute = !this.isMute;
+            if (this.isMute) {
+                this.muteBtn.innerHTML = `<i class="fas fa-volume-pause"></i>`;
+                this.audioPlayer.volume = 0;
+            } else {
+                this.muteBtn.innerHTML = `<i class="fas fa-volume-down"></i>`;
+                this.audioPlayer.volume = this.currentVolume;
+            }
+
+            this.controlBtn.innerHTML = html;
+            this.isMute = !this.isMute;
         };
     },
 
@@ -1255,6 +1280,7 @@ const musicPlayer = {
         // Tải file audio
         this.audioPlayer.src =
             currentSong?.audio_url || currentSong?.track_audio_url;
+        this.audioPlayer.volume = this.currentVolume;
 
         // Cập nhật trạng thái các nút
         this.updateLoopButtonState();
