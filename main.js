@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 libraryContent.insertBefore(playlistItem, likeItem);
                 playlistDropdown.classList.remove("show");
                 await getMyPlayLists();
-                toggleMainContent(false, false, true, true, true, false);
+                toggleMainContent(false, false, false, true, true, true, false);
             } catch (error) {}
         }
     });
@@ -300,6 +300,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         dropdownPlaylistContent.innerHTML = "";
         playlistSearchInput.value = "";
         if (libraryItem) {
+            musicPlayer.isChanged = false;
             const id = libraryItem.dataset.id;
             const type = libraryItem.dataset.type;
             localStorage.setItem("currentPlaylist", JSON.stringify(id));
@@ -315,16 +316,21 @@ document.addEventListener("DOMContentLoaded", async function () {
                 if (tracks.tracks.length > 0) {
                     const listTrack = await getListTrackById(tracks.tracks);
                     renderTrackList(listTrack);
-                    musicPlayer.songList = listTrack;
-                    musicPlayer.currentSongIndex = 0;
+
                     const data = {
                         currentPlaylist: listTrack,
                         currentTrackIndex: 0,
                     };
-                    localStorage.setItem("currentPlayer", JSON.stringify(data));
-                    musicPlayer.isPlaying = false;
-                    musicPlayer.initialize();
-                    toggleMainContent(false, false, true, true, true, false);
+                    localStorage.setItem("futurePlayer", JSON.stringify(data));
+                    toggleMainContent(
+                        false,
+                        false,
+                        false,
+                        true,
+                        true,
+                        true,
+                        false
+                    );
                 } else {
                     const artistHeroTitle =
                         document.querySelector(".artist-hero-title");
@@ -335,7 +341,15 @@ document.addEventListener("DOMContentLoaded", async function () {
                     artistHeroTitle.textContent = playlist.name;
                     artistHeroSubtitle.textContent =
                         playlist.description || playlist.bio;
-                    toggleMainContent(false, false, true, false, true, true);
+                    toggleMainContent(
+                        false,
+                        false,
+                        false,
+                        true,
+                        false,
+                        true,
+                        true
+                    );
                 }
             } catch (error) {}
 
@@ -353,6 +367,17 @@ document.addEventListener("DOMContentLoaded", async function () {
             playlistSection.classList.toggle("show");
         }
         if (playBtnLarge) {
+            const isChanged = musicPlayer.isChanged;
+            if (!isChanged) {
+                musicPlayer.isPlaying = true;
+                musicPlayer.isChanged = true;
+                const data = JSON.parse(localStorage.getItem("futurePlayer"));
+                musicPlayer.songList = data.currentPlaylist;
+                localStorage.setItem("currentPlayer", JSON.stringify(data));
+                musicPlayer.initialize();
+            } else {
+                musicPlayer.isPlaying = false;
+            }
         }
     });
     playlistSection.addEventListener("click", async (e) => {
@@ -535,7 +560,7 @@ document.addEventListener("DOMContentLoaded", function () {
         e.preventDefault();
         const homeBtn = e.target.closest(".home-btn");
         if (homeBtn) {
-            toggleMainContent(true, true);
+            toggleMainContent(true, true, true);
             musicPlayer.isPlaying = false;
             musicPlayer.initialize();
         }
@@ -572,7 +597,7 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.removeItem("currentPlayer");
         localStorage.removeItem("currentPlaylist");
         renderUserInfo();
-        toggleMainContent(true, true);
+        toggleMainContent(true, true, true);
         await myPlaylist();
         await httpRequest.post("auth/logout");
         // TODO: Students will implement logout logic here
@@ -582,9 +607,13 @@ document.addEventListener("DOMContentLoaded", function () {
 // Other functionality
 document.addEventListener("DOMContentLoaded", async function () {
     // TODO: Implement other functionality here
-    toggleMainContent(true, true);
-    await tracksTrending();
-    await artistsTrending();
+    toggleMainContent(true, true, true);
+    const { albums } = await httpRequest.get(`albums/popular?limit=20`);
+    const resTracks = await httpRequest.get("tracks/trending?limit=20");
+    const resArtists = await httpRequest.get("artists/trending?limit=20");
+    await tracksTrending(resTracks);
+    await artistsTrending(resArtists);
+    await albumTrending(albums);
     await renderUserInfo();
     const myPlaylists = JSON.parse(localStorage.getItem("myPlaylists"));
     if (myPlaylists) {
@@ -617,8 +646,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         const playerTitle = playerLeft.querySelector(".player-title");
         const playerArtist = playerLeft.querySelector(".player-artist");
         const playerImage = playerLeft.querySelector(".player-image");
+        const followBtnLarge = e.target.closest(".follow-btn-large");
 
-        const iconPlay = item.querySelector(".icon-play");
+        const iconPlay = item?.querySelector(".icon-play");
         const oldIconPlayTracks = document.querySelectorAll(".fa-pause");
         if (item) {
             playerLeft.classList.remove("show");
@@ -644,11 +674,11 @@ document.addEventListener("DOMContentLoaded", async function () {
                     localStorage.getItem("currentPlayer")
                 );
                 if (!musicPlayer.isPlaying) {
-                    iconPlay.classList.remove("fa-play");
-                    iconPlay.classList.add("fa-pause");
+                    iconPlay?.classList.remove("fa-play");
+                    iconPlay?.classList.add("fa-pause");
                 } else {
-                    iconPlay.classList.remove("fa-pause");
-                    iconPlay.classList.add("fa-play");
+                    iconPlay?.classList.remove("fa-pause");
+                    iconPlay?.classList.add("fa-play");
                 }
                 const currentTrackId = currentPlaylistData?.currentPlaylist[0];
                 if (!currentPlaylistData || currentTrackId.id !== idTrack) {
@@ -663,25 +693,36 @@ document.addEventListener("DOMContentLoaded", async function () {
             } else {
                 const type = item.dataset.type;
                 const id = item.dataset.id;
-                const { tracks } = await httpRequest.get(
-                    `${type + "s/" + id}/tracks/popular`
-                );
-                const artist = await httpRequest.get(`artists/${id}`);
+                let tracks = [];
+                if (type === "artist") {
+                    const res = await httpRequest.get(
+                        `${type + "s/" + id}/tracks/popular`
+                    );
+                    console.log(res);
+                    tracks = res.tracks;
+                } else {
+                    const res = await httpRequest.get(
+                        `${type + "s/" + id}/tracks`
+                    );
+                    tracks = res.tracks;
+                }
                 const trackPlaylist = await getListTrackById(tracks);
-                setTimeout(() => {
-                    toggleMainContent(false, false, true, true, true, false);
-                    musicPlayer.isPlaying = false;
-                    musicPlayer.songList = trackPlaylist;
-                    const data = {
-                        currentPlaylist: trackPlaylist,
-                        currentTrackIndex: 0,
-                    };
 
-                    localStorage.setItem("currentPlayer", JSON.stringify(data));
-                    musicPlayer.initialize();
-                    musicPlayer.togglePlayPause();
-                }, 0);
+                const artist = await httpRequest.get(
+                    `artists/${trackPlaylist[0]?.artist_id}`
+                );
+                renderTrackList(trackPlaylist);
+                toggleMainContent(false, false, false, true, true, true, false);
+                const data = {
+                    currentPlaylist: trackPlaylist,
+                    currentTrackIndex: 0,
+                };
+                musicPlayer.isChanged = false;
+
+                localStorage.setItem("futurePlayer", JSON.stringify(data));
             }
+        }
+        if (followBtnLarge) {
         }
     });
 
@@ -726,6 +767,7 @@ async function addTrackToLikedList(id) {
 function toggleMainContent(
     hitsSectionShow,
     artistsSectionShow,
+    albumSectionShow,
     artistHeroShow,
     artistControlsShow,
     popularSectionShow,
@@ -736,6 +778,7 @@ function toggleMainContent(
     const popularSection = document.querySelector(".popular-section");
     const hitsSection = document.querySelector(".hits-section");
     const artistsSection = document.querySelector(".artists-section");
+    const albumSection = document.querySelector(".album-section");
     const playlistSection = document.querySelector(".playlist-section");
     artistHeroShow
         ? artistHero.classList.add("show")
@@ -743,6 +786,9 @@ function toggleMainContent(
     artistControlsShow
         ? artistControls.classList.add("show")
         : artistControls.classList.remove("show");
+    albumSectionShow
+        ? albumSection.classList.add("show")
+        : albumSection.classList.remove("show");
     popularSectionShow
         ? popularSection.classList.add("show")
         : popularSection.classList.remove("show");
@@ -768,6 +814,10 @@ async function renderUserInfo() {
         userAvatar.src = `${user.avatar_url || "placeholder.svg"}`;
         tippy("#userAvatar", {
             content: `${user.display_name || user.username}`,
+        });
+        tippy("#followBtnLarge", {
+            content: `Follow`,
+            placement: "bottom",
         });
     } catch (error) {
         authButtons.classList.add("show");
@@ -883,8 +933,7 @@ async function myArtistFollows(artists) {
         libraryContent.prepend(divElement);
     }
 }
-async function artistsTrending() {
-    const res = await httpRequest.get("artists/trending?limit=20");
+async function artistsTrending(res) {
     const artistsGrid = document.querySelector(".artists-grid");
     let popularArtists = "";
     if (res) {
@@ -915,8 +964,37 @@ async function artistsTrending() {
     }
     artistsGrid.innerHTML = popularArtists;
 }
-async function tracksTrending() {
-    const res = await httpRequest.get("tracks/trending?limit=20");
+async function albumTrending(albums) {
+    const albumGrid = document.querySelector(`.album-grid`);
+    let html = "";
+    albums.forEach((album) => {
+        const item = `<div
+                                class="album-card card-btn"
+                                data-type="album"
+                                data-id="${escapeHtml(album.id)}"
+                            >
+                                <div class="album-card-cover">
+                                    <img src="${escapeHtml(
+                                        album.cover_image_url
+                                    )}" alt="${escapeHtml(album.title)}" />
+                                    <button class="album-play-btn">
+                                        <i class="fas fa-play icon-play"></i>
+                                    </button>
+                                </div>
+                                <div class="album-card-info">
+                                    <h3 class="album-card-title">${escapeHtml(
+                                        album.title
+                                    )}</h3>
+                                    <p class="album-card-artist">
+                                        ${escapeHtml(album.artist_name)}
+                                    </p>
+                                </div>
+                            </div>`;
+        html += item;
+    });
+    albumGrid.innerHTML = html;
+}
+async function tracksTrending(res) {
     const tracksGrid = document.querySelector(".hits-grid");
     let popularTracks = "";
     if (res) {
@@ -961,9 +1039,9 @@ function renderTrackList(tracks) {
     const artistHeroSubtitle = document.querySelector(".artist-hero-subtitle");
     const heroImage = document.querySelector(".hero-image");
     const trackList = document.querySelector(".track-list");
-    const { currentTrackIndex } = JSON.parse(
-        localStorage.getItem("currentPlayer")
-    );
+    let currentTrackIndex;
+    const currentPlayer = JSON.parse(localStorage.getItem("currentPlayer"));
+    currentTrackIndex = currentPlayer?.currentTrackIndex || 0;
     trackList.innerHTML = "";
     let html = "";
     tracks.forEach(async (track, index) => {
@@ -1028,7 +1106,6 @@ const musicPlayer = {
         SHUFFLE_MODE: "musicPlayer_shuffleMode",
     },
     playlistContainer: document.querySelector(".playlist"),
-    playLargeToggleBtn: document.querySelector(".play-btn-large"),
     playToggleBtn: document.querySelector(".play-btn"),
     currentSongTitle: document.querySelector(".current-song-title"),
     audioPlayer: document.querySelector(".audio-player"),
@@ -1059,6 +1136,7 @@ const musicPlayer = {
     isLoopMode: false,
     isShuffleMode: false,
     isMute: false,
+    isChanged: false,
 
     async initialize() {
         this.loadPlayerState();
@@ -1081,16 +1159,20 @@ const musicPlayer = {
             this.isPlaying = true;
             this.playIcon.classList.remove("fa-play");
             this.playIcon.classList.add("fa-pause");
-            this.playIconLargeBtn?.classList.remove("fa-play");
-            this.playIconLargeBtn?.classList.add("fa-pause");
+            if (this.isChanged) {
+                this.playIconLargeBtn?.classList.remove("fa-play");
+                this.playIconLargeBtn?.classList.add("fa-pause");
+            }
         };
 
         this.audioPlayer.onpause = () => {
             this.isPlaying = false;
             this.playIcon.classList.remove("fa-pause");
             this.playIcon.classList.add("fa-play");
-            this.playIconLargeBtn?.classList.remove("fa-pause");
-            this.playIconLargeBtn?.classList.add("fa-play");
+            if (this.isChanged) {
+                this.playIconLargeBtn?.classList.remove("fa-pause");
+                this.playIconLargeBtn?.classList.add("fa-play");
+            }
         };
 
         this.prevBtn.onclick = this.handleSongNavigation.bind(
@@ -1175,9 +1257,6 @@ const musicPlayer = {
                 this.muteBtn.innerHTML = `<i class="fas fa-volume-down"></i>`;
                 this.audioPlayer.volume = this.currentVolume;
             }
-
-            this.controlBtn.innerHTML = html;
-            this.isMute = !this.isMute;
         };
     },
 
@@ -1257,7 +1336,10 @@ const musicPlayer = {
             };
 
             localStorage.setItem("currentPlayer", JSON.stringify(data));
-            renderTrackList(this.songList);
+            if (this.isChanged) {
+                renderTrackList(this.songList);
+            }
+
             // Cập nhật tiêu đề bài hát đang phát
             this.playerLeft.classList.remove("show");
             this.playerLeft.classList.add("show");
