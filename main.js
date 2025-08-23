@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     const dropdownSearchLibrary = document.querySelector(
         ".dropdown-search-library"
     );
-    //const searchInput = document.querySelector(".search-input");
 
     const artistHero = document.querySelector(".artist-hero");
     const artistControls = document.querySelector(".artist-controls");
@@ -273,7 +272,16 @@ document.addEventListener("DOMContentLoaded", async function () {
                 libraryContent.insertBefore(playlistItem, likeItem);
                 playlistDropdown.classList.remove("show");
                 await getMyPlayLists();
-                toggleMainContent(false, false, false, true, true, true, false);
+                toggleMainContent(
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    false
+                );
             } catch (error) {}
         }
     });
@@ -303,6 +311,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             musicPlayer.isChanged = false;
             const id = libraryItem.dataset.id;
             const type = libraryItem.dataset.type;
+            const itemData = {
+                type: type,
+                id: id,
+            };
+            localStorage.setItem("item", JSON.stringify(itemData));
             localStorage.setItem("currentPlaylist", JSON.stringify(id));
             try {
                 let path = "";
@@ -315,7 +328,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
                 if (tracks.tracks.length > 0) {
                     const listTrack = await getListTrackById(tracks.tracks);
-                    renderTrackList(listTrack);
+                    await renderTrackList(listTrack);
 
                     const data = {
                         currentPlaylist: listTrack,
@@ -323,6 +336,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     };
                     localStorage.setItem("futurePlayer", JSON.stringify(data));
                     toggleMainContent(
+                        false,
                         false,
                         false,
                         false,
@@ -342,6 +356,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     artistHeroSubtitle.textContent =
                         playlist.description || playlist.bio;
                     toggleMainContent(
+                        false,
                         false,
                         false,
                         false,
@@ -556,10 +571,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Close dropdown when clicking outside
-    document.addEventListener("click", function (e) {
+    document.addEventListener("click", async function (e) {
         e.preventDefault();
         const homeBtn = e.target.closest(".home-btn");
+        const searchInput = document.querySelector(".search-input");
         if (homeBtn) {
+            const { albums } = await httpRequest.get(`albums/popular?limit=20`);
+            const resTracks = await httpRequest.get("tracks/trending?limit=20");
+            const resArtists = await httpRequest.get(
+                "artists/trending?limit=20"
+            );
+
+            await tracksTrending(resTracks);
+            await artistsTrending(resArtists);
+            await albumTrending(albums);
             toggleMainContent(true, true, true);
             musicPlayer.isPlaying = false;
             musicPlayer.initialize();
@@ -595,7 +620,9 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.removeItem("myPlaylists");
         localStorage.removeItem("artistFollows");
         localStorage.removeItem("currentPlayer");
+        localStorage.removeItem("futurePlayer");
         localStorage.removeItem("currentPlaylist");
+        localStorage.removeItem("item");
         renderUserInfo();
         toggleMainContent(true, true, true);
         await myPlaylist();
@@ -611,6 +638,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const { albums } = await httpRequest.get(`albums/popular?limit=20`);
     const resTracks = await httpRequest.get("tracks/trending?limit=20");
     const resArtists = await httpRequest.get("artists/trending?limit=20");
+
     await tracksTrending(resTracks);
     await artistsTrending(resArtists);
     await albumTrending(albums);
@@ -647,12 +675,18 @@ document.addEventListener("DOMContentLoaded", async function () {
         const playerArtist = playerLeft.querySelector(".player-artist");
         const playerImage = playerLeft.querySelector(".player-image");
         const followBtnLarge = e.target.closest(".follow-btn-large");
+        const unfollowBtnLarge = e.target.closest(".unfollow-btn-large");
 
         const iconPlay = item?.querySelector(".icon-play");
         const oldIconPlayTracks = document.querySelectorAll(".fa-pause");
         if (item) {
             playerLeft.classList.remove("show");
             playerLeft.classList.add("show");
+            const itemData = {
+                type: item.dataset.type,
+                id: item.dataset.id,
+            };
+            localStorage.setItem("item", JSON.stringify(itemData));
             if (item.dataset.type === "track") {
                 if (oldIconPlayTracks) {
                     oldIconPlayTracks.forEach((icon) => {
@@ -661,11 +695,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                     });
                 }
                 const idTrack = item.dataset.id;
+                console.log(idTrack);
                 const track = await getTrackById(idTrack);
+                console.log(track);
                 playerTitle.textContent = track.title;
                 playerArtist.textContent = track.artist_name;
                 playerImage.src = track.image_url;
-
                 const data = {
                     currentPlaylist: [track],
                     currentTrackIndex: 0,
@@ -693,8 +728,10 @@ document.addEventListener("DOMContentLoaded", async function () {
             } else {
                 const type = item.dataset.type;
                 const id = item.dataset.id;
+                console.log(id);
                 let tracks = [];
                 if (type === "artist") {
+                    console.log("res");
                     const res = await httpRequest.get(
                         `${type + "s/" + id}/tracks/popular`
                     );
@@ -711,8 +748,17 @@ document.addEventListener("DOMContentLoaded", async function () {
                 const artist = await httpRequest.get(
                     `artists/${trackPlaylist[0]?.artist_id}`
                 );
-                renderTrackList(trackPlaylist);
-                toggleMainContent(false, false, false, true, true, true, false);
+                await renderTrackList(trackPlaylist);
+                toggleMainContent(
+                    false,
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    true,
+                    false
+                );
                 const data = {
                     currentPlaylist: trackPlaylist,
                     currentTrackIndex: 0,
@@ -723,6 +769,126 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
         if (followBtnLarge) {
+            const itemData = JSON.parse(localStorage.getItem("item"));
+            if (itemData.type === "artist") {
+                try {
+                    const res = await httpRequest.post(
+                        `artists/${itemData.id}/follow`
+                    );
+                    console.log(res);
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Thành công",
+                        position: "topCenter",
+                    });
+                } catch (error) {
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Thất bại",
+                        position: "topCenter",
+                    });
+                }
+            }
+
+            if (itemData.type === "playlist") {
+                try {
+                    const res = await httpRequest.post(
+                        `playlists/${itemData.id}/follow`
+                    );
+                    console.log(res);
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Thành công",
+                        position: "topCenter",
+                    });
+                } catch (error) {
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Thất bại",
+                        position: "topCenter",
+                    });
+                }
+            }
+            if (itemData.type === "album") {
+                try {
+                    const res = await httpRequest.post(
+                        `albums/${itemData.id}/like`
+                    );
+                    console.log(res);
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Thành công",
+                        position: "topCenter",
+                    });
+                } catch (error) {
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Thất bại",
+                        position: "topCenter",
+                    });
+                }
+            }
+        }
+        if (unfollowBtnLarge) {
+            const itemData = JSON.parse(localStorage.getItem("item"));
+            if (itemData.type === "artist") {
+                try {
+                    const res = await httpRequest.delete(
+                        `artists/${itemData.id}/follow`
+                    );
+                    console.log(res);
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Hủy follow thành công",
+                        position: "topCenter",
+                    });
+                } catch (error) {
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Hủy follow thất bại",
+                        position: "topCenter",
+                    });
+                }
+            }
+
+            if (itemData.type === "playlist") {
+                try {
+                    const res = await httpRequest.delete(
+                        `playlists/${itemData.id}/follow`
+                    );
+                    console.log(res);
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Like ok",
+                        position: "topCenter",
+                    });
+                } catch (error) {
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Like false",
+                        position: "topCenter",
+                    });
+                }
+            }
+            if (itemData.type === "album") {
+                try {
+                    const res = await httpRequest.delete(
+                        `albums/${itemData.id}/like`
+                    );
+                    console.log(res);
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Like ok",
+                        position: "topCenter",
+                    });
+                } catch (error) {
+                    iziToast.info({
+                        title: "Thông Báo",
+                        message: "Like false",
+                        position: "topCenter",
+                    });
+                }
+            }
         }
     });
 
@@ -737,6 +903,67 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 document.addEventListener("DOMContentLoaded", function () {
     document.body.style.userSelect = "none";
+    const searchInput = document.querySelector(".search-input");
+    let timeDelay;
+    searchInput.addEventListener("input", () => {
+        clearTimeout(timeDelay);
+        const hitsSection = document.querySelector(
+            ".hits-section .section-heading"
+        );
+        const artistsSection = document.querySelector(
+            ".artists-section .section-heading"
+        );
+        const albumSection = document.querySelector(
+            ".album-section .section-heading"
+        );
+        const contentPlaylistSection = document.querySelector(
+            ".content-playlist-section .section-heading"
+        );
+        timeDelay = setTimeout(async () => {
+            const value = searchInput.value;
+            if (value.length > 0) {
+                const path = `search?q=${value}&type=all&limit=10`;
+                const listItem = await search(path);
+                const listAlbum = listItem.albums;
+                const listPlaylist = listItem.playlists;
+                listItem.tracks.length > 0
+                    ? (hitsSection.textContent = "Danh sách bài hát đề xuất")
+                    : (hitsSection.textContent = "");
+                listItem.artists.length > 0
+                    ? (artistsSection.textContent = "Danh sách ca sĩ đề xuất")
+                    : (artistsSection.textContent = "");
+                listAlbum.length > 0
+                    ? (albumSection.textContent = "Danh sách album đề xuất")
+                    : (albumSection.textContent = "");
+                listPlaylist.length > 0
+                    ? (contentPlaylistSection.textContent =
+                          "Playlist dành cho bạn")
+                    : (contentPlaylistSection.textContent =
+                          "Playlist dành cho bạn");
+
+                await tracksTrending(listItem);
+                await artistsTrending(listItem);
+                await albumTrending(listAlbum);
+                await playlistTrending(listPlaylist);
+                toggleMainContent(true, true, true, true);
+            } else {
+                toggleMainContent(true, true, true);
+                const { albums } = await httpRequest.get(
+                    `albums/popular?limit=20`
+                );
+                const resTracks = await httpRequest.get(
+                    "tracks/trending?limit=20"
+                );
+                const resArtists = await httpRequest.get(
+                    "artists/trending?limit=20"
+                );
+
+                await tracksTrending(resTracks);
+                await artistsTrending(resArtists);
+                await albumTrending(albums);
+            }
+        }, 600);
+    });
 });
 async function search(path) {
     try {
@@ -768,6 +995,7 @@ function toggleMainContent(
     hitsSectionShow,
     artistsSectionShow,
     albumSectionShow,
+    contentPlaylistSectionShow,
     artistHeroShow,
     artistControlsShow,
     popularSectionShow,
@@ -779,6 +1007,9 @@ function toggleMainContent(
     const hitsSection = document.querySelector(".hits-section");
     const artistsSection = document.querySelector(".artists-section");
     const albumSection = document.querySelector(".album-section");
+    const contentPlaylistSection = document.querySelector(
+        ".content-playlist-section"
+    );
     const playlistSection = document.querySelector(".playlist-section");
     artistHeroShow
         ? artistHero.classList.add("show")
@@ -801,6 +1032,9 @@ function toggleMainContent(
     playlistSectionShow
         ? playlistSection.classList.add("show")
         : playlistSection.classList.remove("show");
+    contentPlaylistSectionShow
+        ? contentPlaylistSection.classList.add("show")
+        : contentPlaylistSection.classList.remove("show");
 }
 async function renderUserInfo() {
     const authButtons = document.querySelector(".auth-buttons");
@@ -814,10 +1048,6 @@ async function renderUserInfo() {
         userAvatar.src = `${user.avatar_url || "placeholder.svg"}`;
         tippy("#userAvatar", {
             content: `${user.display_name || user.username}`,
-        });
-        tippy("#followBtnLarge", {
-            content: `Follow`,
-            placement: "bottom",
         });
     } catch (error) {
         authButtons.classList.add("show");
@@ -976,7 +1206,9 @@ async function albumTrending(albums) {
                                 <div class="album-card-cover">
                                     <img src="${escapeHtml(
                                         album.cover_image_url
-                                    )}" alt="${escapeHtml(album.title)}" />
+                                    )}" alt="${escapeHtml(
+            album.title
+        )}" onerror=" this.onerror=null ;this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9C76COoU19vxN_sXxYEFBhFbJlfN42zstWg&s';"/>
                                     <button class="album-play-btn">
                                         <i class="fas fa-play icon-play"></i>
                                     </button>
@@ -993,6 +1225,43 @@ async function albumTrending(albums) {
         html += item;
     });
     albumGrid.innerHTML = html;
+}
+async function playlistTrending(playlists) {
+    const contentPlaylistGrid = document.querySelector(
+        `.content-playlist-grid`
+    );
+    let html = "";
+    playlists.forEach((playlist) => {
+        const item = `<div
+                                class="playlist-card card-btn"
+                                data-type="playlist"
+                                data-id="${escapeHtml(playlist.id)}"
+                            >
+                                <div class="playlist-card-cover">
+                                    <img src="${escapeHtml(
+                                        playlist.mage_url
+                                    )}" alt="${escapeHtml(
+            playlist.title
+        )}"  onerror=" this.onerror=null ;this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9C76COoU19vxN_sXxYEFBhFbJlfN42zstWg&s';"/>
+                                    <button class="playlist-play-btn">
+                                        <i class="fas fa-play icon-play"></i>
+                                    </button>
+                                </div>
+                                <div class="playlist-card-info">
+                                    <h3 class="playlist-card-title">${escapeHtml(
+                                        playlist.title
+                                    )}</h3>
+                                    <p class="playlist-card-artist">
+                                        ${escapeHtml(
+                                            playlist.additional_info
+                                                .creator_name
+                                        )}
+                                    </p>
+                                </div>
+                            </div>`;
+        html += item;
+    });
+    contentPlaylistGrid.innerHTML = html;
 }
 async function tracksTrending(res) {
     const tracksGrid = document.querySelector(".hits-grid");
@@ -1028,23 +1297,26 @@ async function tracksTrending(res) {
     }
     tracksGrid.innerHTML = popularTracks;
 }
+
 function escapeHtml(str) {
     const div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
 }
-function renderTrackList(tracks) {
+async function renderTrackList(tracks) {
     console.log(tracks);
     const artistHeroTitle = document.querySelector(".artist-hero-title");
     const artistHeroSubtitle = document.querySelector(".artist-hero-subtitle");
     const heroImage = document.querySelector(".hero-image");
     const trackList = document.querySelector(".track-list");
+
     let currentTrackIndex;
+    const itemData = JSON.parse(localStorage.getItem("item"));
     const currentPlayer = JSON.parse(localStorage.getItem("currentPlayer"));
     currentTrackIndex = currentPlayer?.currentTrackIndex || 0;
     trackList.innerHTML = "";
     let html = "";
-    tracks.forEach(async (track, index) => {
+    tracks.forEach((track, index) => {
         html += `<div class="track-item ${
             index === currentTrackIndex ? "playing" : ""
         }" data-index=${index} >
@@ -1081,6 +1353,7 @@ function renderTrackList(tracks) {
                                 </button>
                             </div>`;
     });
+
     heroImage.src =
         tracks[currentTrackIndex]?.image_url ||
         tracks[currentTrackIndex]?.album_cover_image_url;
@@ -1140,7 +1413,7 @@ const musicPlayer = {
 
     async initialize() {
         this.loadPlayerState();
-        this.setupCurrentSong();
+        await this.setupCurrentSong();
         this.setupEventListeners();
     },
 
@@ -1243,8 +1516,8 @@ const musicPlayer = {
         };
 
         // Sự kiện khi bài hát kết thúc
-        this.audioPlayer.onended = () => {
-            this.handleSongNavigation(this.NEXT_SONG);
+        this.audioPlayer.onended = async () => {
+            await this.handleSongNavigation(this.NEXT_SONG);
         };
         this.muteBtn.onclick = () => {
             console.log(this.muteBtn);
@@ -1261,7 +1534,7 @@ const musicPlayer = {
     },
 
     // Xử lý điều hướng bài hát (trước/sau)
-    handleSongNavigation(direction) {
+    async handleSongNavigation(direction) {
         // Luôn phát khi chuyển bài dù trước đó đang pause
         this.isPlaying = true;
 
@@ -1284,7 +1557,7 @@ const musicPlayer = {
         }
 
         // Xử lý chỉ số và cập nhật player
-        this.handleNewSongIndex();
+        await this.handleNewSongIndex();
     },
 
     // Tạo chỉ số ngẫu nhiên cho bài hát (không trùng với bài hiện tại)
@@ -1304,7 +1577,7 @@ const musicPlayer = {
     },
 
     // Xử lý khi có chỉ số bài hát mới
-    handleNewSongIndex() {
+    async handleNewSongIndex() {
         // Đảm bảo chỉ số luôn trong phạm vi hợp lệ (0 đến length-1)
         // Sử dụng modulo để tạo vòng lặp: -1 -> length-1, length -> 0
         this.currentSongIndex =
@@ -1312,7 +1585,7 @@ const musicPlayer = {
             this.songList.length;
 
         // Thiết lập bài hát mới và render lại playlist
-        this.setupCurrentSong();
+        await this.setupCurrentSong();
     },
 
     // Cập nhật trạng thái nút lặp lại
@@ -1327,7 +1600,7 @@ const musicPlayer = {
     },
 
     // Thiết lập bài hát hiện tại (tải file, cập nhật tiêu đề, thiết lập trạng thái)
-    setupCurrentSong() {
+    async setupCurrentSong() {
         const currentSong = this.getCurrentSong();
         if (currentSong) {
             const data = {
@@ -1337,7 +1610,7 @@ const musicPlayer = {
 
             localStorage.setItem("currentPlayer", JSON.stringify(data));
             if (this.isChanged) {
-                renderTrackList(this.songList);
+                await renderTrackList(this.songList);
             }
 
             // Cập nhật tiêu đề bài hát đang phát

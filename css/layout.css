@@ -196,6 +196,12 @@
 .album-section.show {
     display: block;
 }
+.content-playlist-section {
+    display: none;
+}
+.content-playlist-section.show {
+    display: block;
+}
 .add-tracks {
     display: flex;
     margin-top: 10px;
